@@ -297,14 +297,6 @@ bool MIDebugSession::attachToProcess(int pid)
     //set current state to running, after attaching we will get *stopped response
     setDebuggerStateOn(s_appRunning);
 
-    // Currently, we always start debugger with a name of binary,
-    // we might be connecting to a different binary completely,
-    // so cancel all symbol tables gdb has.
-    // We can't omit application name from gdb invocation
-    // because for libtool binaries, we have no way to guess
-    // real binary name.
-    addCommand(MI::FileExecAndSymbols);
-
     addCommand(TargetAttach, QString::number(pid),
                this, &MIDebugSession::handleTargetAttach,
                CmdHandlesError);

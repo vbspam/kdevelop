@@ -74,6 +74,9 @@ private slots:
     void testStackDeactivateAndActive();
     void testStackSwitchThread();
 
+    void testAttach();
+    void testManualAttach();
+
     void testVariablesLocals();
     void testVariablesLocalsStruct();
     void testVariablesWatches();

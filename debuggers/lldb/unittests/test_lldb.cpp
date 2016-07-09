@@ -939,6 +939,63 @@ void LldbTest::testStackSwitchThread()
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 }
 
+void LldbTest::testAttach()
+{
+    SKIP_IF_ATTACH_FORBIDDEN();
+
+    QString fileName = findSourceFile("debugeeslow.cpp");
+
+    KProcess debugeeProcess;
+    debugeeProcess << "nice" << findExecutable("lldb_debugeeslow").toLocalFile();
+    debugeeProcess.start();
+    QVERIFY(debugeeProcess.waitForStarted());
+    QTest::qWait(100);
+
+    TestDebugSession *session = new TestDebugSession;
+    session->attachToProcess(debugeeProcess.pid());
+
+    WAIT_FOR_A_WHILE(session, 100);
+
+    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(fileName), 35);
+
+    // lldb-mi sliently stops when attaching to a process. Force it continue to run.
+    session->addCommand(MI::ExecContinue, QString(), MI::CmdMaybeStartsRunning);
+    WAIT_FOR_A_WHILE(session, 2000);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+
+    QCOMPARE(session->currentLine(), 35);
+
+    session->run();
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
+}
+
+void LldbTest::testManualAttach()
+{
+    QSKIP("Skipping... No remote debug support implemented");
+    SKIP_IF_ATTACH_FORBIDDEN();
+
+    QString fileName = findSourceFile("debugeeslow.cpp");
+
+    KProcess debugeeProcess;
+    debugeeProcess << "nice" << findExecutable("lldb_debugeeslow").toLocalFile();
+    debugeeProcess.start();
+    QVERIFY(debugeeProcess.waitForStarted());
+
+    TestDebugSession *session = new TestDebugSession;
+    TestLaunchConfiguration cfg;
+
+    // Start remote debugging
+    //QVERIFY(session->startDebugging(&cfg, m_iface));
+
+    session->addCommand(MI::NonMI, QString("attach %0").arg(debugeeProcess.pid()));
+    WAIT_FOR_STATE(session, DebugSession::PausedState);
+
+    session->run();
+    WAIT_FOR_A_WHILE(session, 2000); // give the slow inferior some extra time to run
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
+}
+
+
 void LldbTest::testVariablesLocals()
 {
     QSKIP("TODO");
