@@ -77,6 +77,8 @@ private slots:
     void testAttach();
     void testManualAttach();
 
+    void testCoreFile();
+
     void testVariablesLocals();
     void testVariablesLocalsStruct();
     void testVariablesWatches();

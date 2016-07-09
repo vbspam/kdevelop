@@ -995,6 +995,38 @@ void LldbTest::testManualAttach()
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 }
 
+void LldbTest::testCoreFile()
+{
+    // TODO: support for coredumpctl
+
+    QFile f("core");
+    if (f.exists()) f.remove();
+
+    KProcess debugeeProcess;
+    debugeeProcess.setOutputChannelMode(KProcess::MergedChannels);
+    debugeeProcess << "bash" << "-c" << "ulimit -c unlimited; " + findExecutable("lldb_debugeecrash").toLocalFile();
+    debugeeProcess.start();
+    debugeeProcess.waitForFinished();
+    qDebug() << debugeeProcess.readAll();
+    if (!QFile::exists("core")) {
+        QSKIP("no core dump found, check your system configuration (see /proc/sys/kernel/core_pattern).", SkipSingle);
+    }
+
+    TestDebugSession *session = new TestDebugSession;
+    session->examineCoreFile(findExecutable("lldb_debugeecrash"), QUrl::fromLocalFile(QDir::currentPath()+"/core"));
+
+    TestFrameStackModel *stackModel = session->frameStackModel();
+
+    WAIT_FOR_STATE(session, DebugSession::StoppedState);
+
+    QModelIndex tIdx = stackModel->index(0,0);
+    QCOMPARE(stackModel->rowCount(QModelIndex()), 1);
+    QCOMPARE(stackModel->columnCount(QModelIndex()), 3);
+    COMPARE_DATA(tIdx, "#1 at foo");
+
+    session->stopDebugger();
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
+}
 
 void LldbTest::testVariablesLocals()
 {
