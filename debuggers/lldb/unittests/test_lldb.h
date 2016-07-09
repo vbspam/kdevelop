@@ -67,6 +67,13 @@ private slots:
     void testInsertBreakpointFunctionName();
     void testManualBreakpoint();
 
+    void testShowStepInSource();
+
+    void testStack();
+    void testStackFetchMore();
+    void testStackDeactivateAndActive();
+    void testStackSwitchThread();
+
     void testVariablesLocals();
     void testVariablesLocalsStruct();
     void testVariablesWatches();

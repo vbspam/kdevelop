@@ -35,6 +35,11 @@ public:
     LldbFrameStackModel(DebugSession* session);
 
     DebugSession* session();
+protected:
+    void fetchThreads() override;
+
+private:
+    void handleThreadInfo(const MI::ResultRecord& r);
 };
 
 } // end of namespace LLDB

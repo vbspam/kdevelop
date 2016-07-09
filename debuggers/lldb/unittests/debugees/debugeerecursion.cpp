@@ -20,7 +20,7 @@
 void foo() {
     static int i=0;
     ++i;
-    if (i < 300)
+    if (i < 298)
         foo();
     else
         std::cout << "Hello, world!" << std::endl;

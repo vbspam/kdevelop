@@ -675,7 +675,7 @@ void LldbTest::testInsertBreakpointFunctionName()
 
 void LldbTest::testManualBreakpoint()
 {
-    QSKIP("Skipping... lldb-mi output malformated reponse which breaks this");
+    QSKIP("Skipping... lldb-mi output malformated response which breaks this");
     TestDebugSession *session = new TestDebugSession;
     TestLaunchConfiguration cfg;
 
@@ -707,6 +707,233 @@ void LldbTest::testManualBreakpoint()
     session->addCommand(MI::NonMI, "break delete 2");
     WAIT_FOR_A_WHILE(session, 100);
     QCOMPARE(breakpoints()->rowCount(), 0);
+
+    session->run();
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
+}
+
+void LldbTest::testShowStepInSource()
+{
+    TestDebugSession *session = new TestDebugSession;
+    TestLaunchConfiguration cfg;
+
+    QSignalSpy showStepInSourceSpy(session, &TestDebugSession::showStepInSource);
+
+    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 29);
+
+    session->startDebugging(&cfg, m_iface);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+
+    session->stepInto();
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+
+    session->stepInto();
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+    session->run();
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
+
+    {
+        QCOMPARE(showStepInSourceSpy.count(), 3);
+        QList<QVariant> arguments = showStepInSourceSpy.takeFirst();
+        QCOMPARE(arguments.first().value<QUrl>(), QUrl::fromLocalFile(m_debugeeFileName));
+        QCOMPARE(arguments.at(1).toInt(), 29);
+
+        arguments = showStepInSourceSpy.takeFirst();
+        QCOMPARE(arguments.first().value<QUrl>(), QUrl::fromLocalFile(m_debugeeFileName));
+        QCOMPARE(arguments.at(1).toInt(), 22);
+
+        arguments = showStepInSourceSpy.takeFirst();
+        QCOMPARE(arguments.first().value<QUrl>(), QUrl::fromLocalFile(m_debugeeFileName));
+        QCOMPARE(arguments.at(1).toInt(), 23);
+    }
+}
+
+void LldbTest::testStack()
+{
+    TestDebugSession *session = new TestDebugSession;
+    TestLaunchConfiguration cfg;
+
+    TestFrameStackModel *stackModel = session->frameStackModel();
+
+    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 21);
+
+    QVERIFY(session->startDebugging(&cfg, m_iface));
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+
+    QModelIndex tIdx = stackModel->index(0,0);
+    QCOMPARE(stackModel->rowCount(QModelIndex()), 1);
+    QCOMPARE(stackModel->columnCount(QModelIndex()), 3);
+    COMPARE_DATA(tIdx, "#1 at foo()");
+
+    QCOMPARE(stackModel->rowCount(tIdx), 4);
+    QCOMPARE(stackModel->columnCount(tIdx), 3);
+    COMPARE_DATA(tIdx.child(0, 0), "0");
+    COMPARE_DATA(tIdx.child(0, 1), "foo()");
+    COMPARE_DATA(tIdx.child(0, 2), m_debugeeFileName+":23");
+    COMPARE_DATA(tIdx.child(1, 0), "1");
+    COMPARE_DATA(tIdx.child(1, 1), "main");
+    COMPARE_DATA(tIdx.child(1, 2), m_debugeeFileName+":29");
+    COMPARE_DATA(tIdx.child(2, 0), "2");
+    COMPARE_DATA(tIdx.child(2, 1), "__libc_start_main");
+    COMPARE_DATA(tIdx.child(3, 0), "3");
+    COMPARE_DATA(tIdx.child(3, 1), "_start");
+
+
+    session->stepOut();
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+    COMPARE_DATA(tIdx, "#1 at main");
+    QCOMPARE(stackModel->rowCount(tIdx), 3);
+    COMPARE_DATA(tIdx.child(0, 0), "0");
+    COMPARE_DATA(tIdx.child(0, 1), "main");
+    COMPARE_DATA(tIdx.child(0, 2), m_debugeeFileName+":30");
+    COMPARE_DATA(tIdx.child(1, 0), "1");
+    COMPARE_DATA(tIdx.child(1, 1), "__libc_start_main");
+    COMPARE_DATA(tIdx.child(2, 0), "2");
+    COMPARE_DATA(tIdx.child(2, 1), "_start");
+
+    session->run();
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+
+    session->run();
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
+}
+
+void LldbTest::testStackFetchMore()
+{
+    TestDebugSession *session = new TestDebugSession;
+    TestLaunchConfiguration cfg(findExecutable("lldb_debugeerecursion"));
+    QString fileName = findSourceFile("debugeerecursion.cpp");
+
+    TestFrameStackModel *stackModel = session->frameStackModel();
+
+    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(fileName), 25);
+
+    QVERIFY(session->startDebugging(&cfg, m_iface));
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+    QCOMPARE(session->frameStackModel()->fetchFramesCalled, 1);
+
+    QModelIndex tIdx = stackModel->index(0,0);
+    QCOMPARE(stackModel->rowCount(QModelIndex()), 1);
+    QCOMPARE(stackModel->columnCount(QModelIndex()), 3);
+    COMPARE_DATA(tIdx, "#1 at foo()");
+
+    QCOMPARE(stackModel->rowCount(tIdx), 21);
+    COMPARE_DATA(tIdx.child(0, 0), "0");
+    COMPARE_DATA(tIdx.child(0, 1), "foo()");
+    COMPARE_DATA(tIdx.child(0, 2), fileName+":26");
+    COMPARE_DATA(tIdx.child(1, 0), "1");
+    COMPARE_DATA(tIdx.child(1, 1), "foo()");
+    COMPARE_DATA(tIdx.child(1, 2), fileName+":24");
+    COMPARE_DATA(tIdx.child(2, 0), "2");
+    COMPARE_DATA(tIdx.child(2, 1), "foo()");
+    COMPARE_DATA(tIdx.child(2, 2), fileName+":24");
+    COMPARE_DATA(tIdx.child(19, 0), "19");
+    COMPARE_DATA(tIdx.child(20, 0), "20");
+
+    stackModel->fetchMoreFrames();
+    WAIT_FOR_A_WHILE(session, 200);
+    QCOMPARE(stackModel->fetchFramesCalled, 2);
+    QCOMPARE(stackModel->rowCount(tIdx), 41);
+    COMPARE_DATA(tIdx.child(20, 0), "20");
+    COMPARE_DATA(tIdx.child(21, 0), "21");
+    COMPARE_DATA(tIdx.child(22, 0), "22");
+    COMPARE_DATA(tIdx.child(39, 0), "39");
+    COMPARE_DATA(tIdx.child(40, 0), "40");
+
+    stackModel->fetchMoreFrames();
+    WAIT_FOR_A_WHILE(session, 200);
+    QCOMPARE(stackModel->fetchFramesCalled, 3);
+    QCOMPARE(stackModel->rowCount(tIdx), 121);
+    COMPARE_DATA(tIdx.child(40, 0), "40");
+    COMPARE_DATA(tIdx.child(41, 0), "41");
+    COMPARE_DATA(tIdx.child(42, 0), "42");
+    COMPARE_DATA(tIdx.child(119, 0), "119");
+    COMPARE_DATA(tIdx.child(120, 0), "120");
+
+    stackModel->fetchMoreFrames();
+    WAIT_FOR_A_WHILE(session, 200);
+    QCOMPARE(stackModel->fetchFramesCalled, 4);
+    QCOMPARE(stackModel->rowCount(tIdx), 301);
+    COMPARE_DATA(tIdx.child(120, 0), "120");
+    COMPARE_DATA(tIdx.child(121, 0), "121");
+    COMPARE_DATA(tIdx.child(122, 0), "122");
+    COMPARE_DATA(tIdx.child(298, 0), "298");
+    COMPARE_DATA(tIdx.child(298, 1), "main");
+    COMPARE_DATA(tIdx.child(298, 2), fileName+":30");
+    COMPARE_DATA(tIdx.child(299, 0), "299");
+    COMPARE_DATA(tIdx.child(299, 1), "__libc_start_main");
+    COMPARE_DATA(tIdx.child(300, 0), "300");
+    COMPARE_DATA(tIdx.child(300, 1), "_start");
+
+    stackModel->fetchMoreFrames(); //nothing to fetch, we are at the end
+    WAIT_FOR_A_WHILE(session, 200);
+    QCOMPARE(stackModel->fetchFramesCalled, 4);
+    QCOMPARE(stackModel->rowCount(tIdx), 301);
+
+    session->run();
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
+}
+
+void LldbTest::testStackDeactivateAndActive()
+{
+    TestDebugSession *session = new TestDebugSession;
+    TestLaunchConfiguration cfg;
+
+    TestFrameStackModel *stackModel = session->frameStackModel();
+
+    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 21);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
+    WAIT_FOR_STATE(session, DebugSession::PausedState);
+
+    QModelIndex tIdx = stackModel->index(0,0);
+
+    session->stepOut();
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+    COMPARE_DATA(tIdx, "#1 at main");
+    QCOMPARE(stackModel->rowCount(tIdx), 3);
+    COMPARE_DATA(tIdx.child(0, 0), "0");
+    COMPARE_DATA(tIdx.child(0, 1), "main");
+    COMPARE_DATA(tIdx.child(0, 2), m_debugeeFileName+":30");
+    COMPARE_DATA(tIdx.child(1, 0), "1");
+    COMPARE_DATA(tIdx.child(1, 1), "__libc_start_main");
+    COMPARE_DATA(tIdx.child(2, 0), "2");
+    COMPARE_DATA(tIdx.child(2, 1), "_start");
+
+    session->run();
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+
+    session->run();
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
+}
+
+void LldbTest::testStackSwitchThread()
+{
+    QSKIP("Skipping... lldb-mi crashes when break at a location with multiple threads running");
+    TestDebugSession *session = new TestDebugSession;
+    TestLaunchConfiguration cfg(findExecutable("lldb_debugeethreads"));
+    QString fileName = findSourceFile("debugeethreads.cpp");
+
+    TestFrameStackModel *stackModel = session->frameStackModel();
+
+    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(fileName), 38);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+
+    QCOMPARE(stackModel->rowCount(), 4);
+
+    QModelIndex tIdx = stackModel->index(0,0);
+    COMPARE_DATA(tIdx, "#1 at main");
+    QCOMPARE(stackModel->rowCount(tIdx), 1);
+    COMPARE_DATA(tIdx.child(0, 0), "0");
+    COMPARE_DATA(tIdx.child(0, 1), "main");
+    COMPARE_DATA(tIdx.child(0, 2), fileName+":39");
+
+    tIdx = stackModel->index(1,0);
+    QVERIFY(stackModel->data(tIdx).toString().startsWith("#2 at "));
+    stackModel->setCurrentThread(2);
+    WAIT_FOR_A_WHILE(session, 200);
+    int rows = stackModel->rowCount(tIdx);
+    QVERIFY(rows > 3);
 
     session->run();
     WAIT_FOR_STATE(session, DebugSession::EndedState);

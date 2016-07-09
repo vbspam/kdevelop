@@ -22,9 +22,26 @@
 
 #include "framestackmodel.h"
 
+#include "debuglog.h"
 #include "debugsession.h"
+#include "mi/micommand.h"
+
+#include <KLocalizedString>
+
+namespace {
+
+QString getFunctionOrAddress(const KDevMI::MI::Value &frame)
+{
+    if (frame.hasField("func"))
+        return frame["func"].literal();
+    else
+        return frame["addr"].literal();
+}
+
+}
 
 using namespace KDevMI::LLDB;
+using namespace KDevMI::MI;
 
 LldbFrameStackModel::LldbFrameStackModel(DebugSession *session)
     : MIFrameStackModel(session)
@@ -34,4 +51,60 @@ LldbFrameStackModel::LldbFrameStackModel(DebugSession *session)
 DebugSession* LldbFrameStackModel::session()
 {
     return static_cast<DebugSession *>(FrameStackModel::session());
+}
+
+void LldbFrameStackModel::fetchThreads()
+{
+    // TODO: preliminary test shows there might be a bug in lldb-mi
+    // that's causing std::logic_error when executing -thread-info with
+    // more than one threads. Find a workaround for this (and report bug
+    // if it truely is).
+    session()->addCommand(ThreadInfo, "", this, &LldbFrameStackModel::handleThreadInfo);
+}
+
+void LldbFrameStackModel::handleThreadInfo(const ResultRecord& r)
+{
+    const Value& threads = r["threads"];
+
+    QList<FrameStackModel::ThreadItem> threadsList;
+    for (int gidx = 0; gidx != threads.size(); ++gidx) {
+        FrameStackModel::ThreadItem i;
+        const Value & threadMI = threads[gidx];
+        i.nr = threadMI["id"].toInt();
+        if (threadMI["state"].literal() == "stopped") {
+            // lldb-mi returns multiple frame entry for each thread
+            // so can't directly use threadMI["frame"]
+            auto &th = dynamic_cast<const TupleValue&>(threadMI);
+            Value *topFrame = nullptr;
+            for (auto res : th.results) {
+                if (res->variable == "frame") {
+                    if (!topFrame || (*res->value)["level"].toInt() < (*topFrame)["level"].toInt()) {
+                        topFrame = res->value;
+                    }
+                }
+            }
+            i.name = getFunctionOrAddress(*topFrame);
+        } else {
+            i.name = i18n("(running)");
+        }
+        threadsList << i;
+    }
+    setThreads(threadsList);
+    if (r.hasField("current-thread-id")) {
+        int currentThreadId = r["current-thread-id"].toInt();
+
+        setCurrentThread(currentThreadId);
+
+        if (session()->hasCrashed()) {
+            setCrashedThreadIndex(currentThreadId);
+        }
+    }
+    // FIXME: lldb-mi doesn't have current-thread-id field. This workaround this
+    // in single threaded case
+    if (threadsList.size() == 1) {
+        setCurrentThread(threadsList[0].nr);
+        if (session()->hasCrashed()) {
+            setCrashedThreadIndex(threadsList[0].nr);
+        }
+    }
 }
