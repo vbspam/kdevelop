@@ -1124,11 +1124,10 @@ void LldbTest::testVariablesLocalsStruct()
 
 void LldbTest::testVariablesWatches()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
-    m_core->debugController()->variableCollection()->variableWidgetShown();
-
     TestLaunchConfiguration cfg;
+
+    m_core->debugController()->variableCollection()->variableWidgetShown();
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 38);
     QVERIFY(session->startDebugging(&cfg, m_iface));
@@ -1165,11 +1164,10 @@ void LldbTest::testVariablesWatches()
 
 void LldbTest::testVariablesWatchesQuotes()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
-    session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateWatches);
-
     TestLaunchConfiguration cfg;
+
+    session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateWatches);
 
     const QString testString("test");
     const QString quotedTestString("\"" + testString + "\"");
@@ -1179,12 +1177,12 @@ void LldbTest::testVariablesWatchesQuotes()
     WAIT_FOR_STATE(session, DebugSession::PausedState);
 
     variableCollection()->watches()->add(quotedTestString); //just a constant string
-    WAIT_FOR_A_WHILE(session, 300);
+    WAIT_FOR_A_WHILE(session, 3000);
 
     QModelIndex i = variableCollection()->index(0, 0);
     QCOMPARE(variableCollection()->rowCount(i), 1);
     COMPARE_DATA(variableCollection()->index(0, 0, i), quotedTestString);
-    COMPARE_DATA(variableCollection()->index(0, 1, i), "[" + QString::number(testString.length() + 1) + "]");
+    COMPARE_DATA(variableCollection()->index(0, 1, i), QStringLiteral("[%0]").arg(testString.length() + 1));
 
     QModelIndex testStr = variableCollection()->index(0, 0, i);
     COMPARE_DATA(variableCollection()->index(0, 0, testStr), "...");
@@ -1193,13 +1191,13 @@ void LldbTest::testVariablesWatchesQuotes()
     int len = testString.length();
     for (int ind = 0; ind < len; ind++)
     {
-        COMPARE_DATA(variableCollection()->index(ind, 0, testStr), QString::number(ind));
+        COMPARE_DATA(variableCollection()->index(ind, 0, testStr), QStringLiteral("[%0]").arg(ind));
         QChar c = testString.at(ind);
         QString value = QString::number(c.toLatin1()) + " '" + c + "'";
         COMPARE_DATA(variableCollection()->index(ind, 1, testStr), value);
     }
-    COMPARE_DATA(variableCollection()->index(len, 0, testStr), QString::number(len));
-    COMPARE_DATA(variableCollection()->index(len, 1, testStr), "0 '\\000'");
+    COMPARE_DATA(variableCollection()->index(len, 0, testStr), QStringLiteral("[%0]").arg(len));
+    COMPARE_DATA(variableCollection()->index(len, 1, testStr), "0 '\\0'");
 
     session->run();
     WAIT_FOR_STATE(session, DebugSession::EndedState);
