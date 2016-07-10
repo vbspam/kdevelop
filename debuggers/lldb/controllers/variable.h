@@ -41,6 +41,10 @@ public:
                 const QString& expression, const QString& display = "");
 
     void handleRawUpdate(const MI::ResultRecord &r);
+
+    // For testing
+    using KDevelop::Variable::childCount;
+    using KDevelop::Variable::child;
 };
 
 } // end of namespace LLDB

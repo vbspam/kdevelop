@@ -1205,15 +1205,14 @@ void LldbTest::testVariablesWatchesQuotes()
 
 void LldbTest::testVariablesWatchesTwoSessions()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
-    session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateWatches);
-
     TestLaunchConfiguration cfg;
+
+    session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateWatches);
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 38);
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     variableCollection()->watches()->add("ts");
     WAIT_FOR_A_WHILE(session, 300);
@@ -1226,85 +1225,70 @@ void LldbTest::testVariablesWatchesTwoSessions()
 
     //check if variable is marked as out-of-scope
     QCOMPARE(variableCollection()->watches()->childCount(), 1);
-    KDevelop::Variable* v = watchVariableAt(0);
+    auto v = dynamic_cast<LldbVariable*>(watchVariableAt(0));
     QVERIFY(v);
     QVERIFY(!v->inScope());
-
-    // TODO: not sure what this means, reenable this after fix access problem
-    /*
     QCOMPARE(v->childCount(), 3);
-    v = dynamic_cast<KDevelop::Variable*>(v->child(0));
+    v = dynamic_cast<LldbVariable*>(v->child(0));
     QVERIFY(!v->inScope());
-    */
 
     //start a second debug session
     session = new TestDebugSession;
     session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateWatches);
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
-    WAIT_FOR_A_WHILE(session, 300);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     QCOMPARE(variableCollection()->watches()->childCount(), 1);
     ts = variableCollection()->index(0, 0, variableCollection()->index(0, 0));
-    v = watchVariableAt(0);
+    v = dynamic_cast<LldbVariable*>(watchVariableAt(0));
     QVERIFY(v);
     QVERIFY(v->inScope());
-
-    // TODO: not sure what this means, reenable this after fix access problem
-    /*
     QCOMPARE(v->childCount(), 3);
-    v = dynamic_cast<KDevelop::Variable*>(v->child(0));
+    v = dynamic_cast<LldbVariable*>(v->child(0));
     QVERIFY(v->inScope());
-    QCOMPARE(v->data(1, Qt::DisplayRole).toString(), QString::number(0));
-    */
+    COMPARE_DATA(variableCollection()->indexForItem(v, 1), QString::number(0));
 
     session->run();
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 
     //check if variable is marked as out-of-scope
-    // TODO: not sure what this means, reenable this after fix access problem
-    /*
-    v = dynamic_cast<KDevelop::Variable*>(variableCollection()->watches()->child(0));
+    v = dynamic_cast<LldbVariable*>(watchVariableAt(0));
     QVERIFY(!v->inScope());
     QVERIFY(!dynamic_cast<KDevelop::Variable*>(v->child(0))->inScope());
-    */
 }
 
 void LldbTest::testVariablesStopDebugger()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
-    session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateLocals);
-
     TestLaunchConfiguration cfg;
+
+    session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateLocals);
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 38);
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     session->stopDebugger();
-    WAIT_FOR_A_WHILE(session, 300);
+    WAIT_FOR_STATE(session, DebugSession::EndedState);
 }
-
 
 void LldbTest::testVariablesStartSecondSession()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
-    session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateLocals);
-
     TestLaunchConfiguration cfg;
+
+    session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateLocals);
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 38);
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     session = new TestDebugSession;
     session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateLocals);
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 38);
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     session->run();
     WAIT_FOR_STATE(session, DebugSession::EndedState);
@@ -1312,22 +1296,21 @@ void LldbTest::testVariablesStartSecondSession()
 
 void LldbTest::testVariablesSwitchFrame()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
     TestLaunchConfiguration cfg;
 
     session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateLocals);
+
     TestFrameStackModel *stackModel = session->frameStackModel();
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 24);
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
-    WAIT_FOR_A_WHILE(session, 500);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     QModelIndex i = variableCollection()->index(1, 0);
     COMPARE_DATA(i, "Locals");
     QCOMPARE(variableCollection()->rowCount(i), 1);
-    COMPARE_DATA(variableCollection()->index(0, 0, i), "i");
+    COMPARE_DATA(variableCollection()->index(0, 0, i), "j"); // only non-static variable works
     COMPARE_DATA(variableCollection()->index(0, 1, i), "1");
 
     stackModel->setCurrentFrame(1);
@@ -1340,28 +1323,28 @@ void LldbTest::testVariablesSwitchFrame()
     COMPARE_DATA(variableCollection()->index(3, 0, i), "argv");
 
     breakpoints()->removeRow(0);
+
     session->run();
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 }
 
 void LldbTest::testVariablesQuicklySwitchFrame()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
     TestLaunchConfiguration cfg;
 
     session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateLocals);
+
     TestFrameStackModel *stackModel = session->frameStackModel();
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 24);
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
-    WAIT_FOR_A_WHILE(session, 500);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     QModelIndex i = variableCollection()->index(1, 0);
     COMPARE_DATA(i, "Locals");
     QCOMPARE(variableCollection()->rowCount(i), 1);
-    COMPARE_DATA(variableCollection()->index(0, 0, i), "i");
+    COMPARE_DATA(variableCollection()->index(0, 0, i), "j"); // only non-static variable works
     COMPARE_DATA(variableCollection()->index(0, 1, i), "1");
 
     stackModel->setCurrentFrame(1);
