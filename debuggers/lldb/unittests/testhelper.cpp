@@ -74,12 +74,16 @@ bool isAttachForbidden(const char *file, int line)
     return false;
 }
 
-void compareData(QModelIndex index, QString expected, const char *file, int line)
+bool compareData(QModelIndex index, QString expected, const char *file, int line)
 {
     QString s = index.model()->data(index, Qt::DisplayRole).toString();
     if (s != expected) {
-        QFAIL(qPrintable(QString("'%0' didn't match expected '%1' in %2:%3").arg(s).arg(expected).arg(file).arg(line)));
+        QTest::qFail(qPrintable(QString("'%0' didn't match expected '%1' in %2:%3")
+                                .arg(s).arg(expected).arg(file).arg(line)),
+                     file, line);
+        return false;
     }
+    return true;
 }
 
 bool waitForAWhile(MIDebugSession *session, int ms, const char *file, int line)

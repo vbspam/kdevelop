@@ -45,6 +45,24 @@
 #include <QTest>
 #include <QUrl>
 
+#define WAIT_FOR_STATE(session, state) \
+    do { if (!KDevMI::LLDB::waitForState((session), (state), __FILE__, __LINE__)) return; } while (0)
+
+#define WAIT_FOR_STATE_AND_IDLE(session, state) \
+    do { if (!KDevMI::LLDB::waitForState((session), (state), __FILE__, __LINE__, true)) return; } while (0)
+
+#define WAIT_FOR_A_WHILE(session, ms) \
+    do { if (!KDevMI::LLDB::waitForAWhile((session), (ms), __FILE__, __LINE__)) return; } while (0)
+
+#define WAIT_FOR(session, condition) \
+    do { \
+        KDevMI::LLDB::TestWaiter w((session), #condition, __FILE__, __LINE__); \
+        while (w.waitUnless((condition))) /* nothing */ ; \
+    } while(0)
+
+#define COMPARE_DATA(index, expected) \
+    do { if (!KDevMI::LLDB::compareData((index), (expected), __FILE__, __LINE__)) return; } while (0)
+
 #define SKIP_IF_ATTACH_FORBIDDEN() \
     do { \
         if (isAttachForbidden(__FILE__, __LINE__)) \

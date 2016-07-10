@@ -40,7 +40,7 @@ QUrl findExecutable(const QString& name);
 QString findSourceFile(const char *file, const QString& name);
 bool isAttachForbidden(const char *file, int line);
 
-void compareData(QModelIndex index, QString expected, const char *file, int line);
+bool compareData(QModelIndex index, QString expected, const char *file, int line);
 
 bool waitForState(MIDebugSession *session, KDevelop::IDebugSession::DebuggerState state,
                   const char *file, int line, bool waitForIdle = false);
@@ -65,23 +65,5 @@ private:
 
 } // end of namespace LLDB
 } // end of namespace KDevMI
-
-#define WAIT_FOR_STATE(session, state) \
-    do { if (!KDevMI::LLDB::waitForState((session), (state), __FILE__, __LINE__)) return; } while (0)
-
-#define WAIT_FOR_STATE_AND_IDLE(session, state) \
-    do { if (!KDevMI::LLDB::waitForState((session), (state), __FILE__, __LINE__, true)) return; } while (0)
-
-#define WAIT_FOR_A_WHILE(session, ms) \
-    do { if (!KDevMI::LLDB::waitForAWhile((session), (ms), __FILE__, __LINE__)) return; } while (0)
-
-#define WAIT_FOR(session, condition) \
-    do { \
-        KDevMI::LLDB::TestWaiter w((session), #condition, __FILE__, __LINE__); \
-        while (w.waitUnless((condition))) /* nothing */ ; \
-    } while(0)
-
-#define COMPARE_DATA(index, expected) \
-    KDevMI::LLDB::compareData((index), (expected), __FILE__, __LINE__)
 
 #endif // LLDB_UNITTEST_H
