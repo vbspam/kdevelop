@@ -24,6 +24,7 @@
 #define LLDB_VARIABLECONTROLLER_H
 
 #include "mivariablecontroller.h"
+#include "variable.h"
 
 namespace KDevMI { namespace LLDB {
 
@@ -35,6 +36,10 @@ class VariableController : public MIVariableController
 public:
     VariableController(DebugSession* parent);
 
+    void update() override;
+    LldbVariable* createVariable(KDevelop::TreeModel* model, KDevelop::TreeItem* parent,
+                                 const QString& expression,
+                                 const QString& display = "") override;
 private:
     DebugSession* debugSession() const;
 };

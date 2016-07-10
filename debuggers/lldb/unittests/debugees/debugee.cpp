@@ -20,7 +20,7 @@ struct testStruct { int a; int b; int c; };
 void noop() {}
 void foo() {
     static int i=0;
-    ++i;
+    ++i; int j = i;
     noop();
     noop();
 }

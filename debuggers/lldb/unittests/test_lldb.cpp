@@ -1030,28 +1030,30 @@ void LldbTest::testCoreFile()
 
 void LldbTest::testVariablesLocals()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
-    session->variableController()->setAutoUpdate(IVariableController::UpdateLocals);
-
     TestLaunchConfiguration cfg;
 
-    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 22);
+    session->variableController()->setAutoUpdate(IVariableController::UpdateLocals);
+
+    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 24);
+
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
-    WAIT_FOR_A_WHILE(session, 1000);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     QCOMPARE(variableCollection()->rowCount(), 2);
     QModelIndex i = variableCollection()->index(1, 0);
     COMPARE_DATA(i, "Locals");
+
     QCOMPARE(variableCollection()->rowCount(i), 1);
-    COMPARE_DATA(variableCollection()->index(0, 0, i), "i");
-    COMPARE_DATA(variableCollection()->index(0, 1, i), "0");
-    session->run();
-    WAIT_FOR_A_WHILE(session, 1000);
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
-    COMPARE_DATA(variableCollection()->index(0, 0, i), "i");
+    COMPARE_DATA(variableCollection()->index(0, 0, i), "j");
     COMPARE_DATA(variableCollection()->index(0, 1, i), "1");
+
+    session->run();
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
+
+    COMPARE_DATA(variableCollection()->index(0, 0, i), "j");
+    COMPARE_DATA(variableCollection()->index(0, 1, i), "2");
+
     session->run();
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 }

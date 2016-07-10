@@ -211,6 +211,13 @@ QString LldbCommand::cmdToSend()
                 command_ = "-w read_write " + command_.mid(3);
             }
             break;
+        case StackListArguments:
+            // some times when adding the command, the current frame is invalid,
+            // but is valid at sending time
+            if (command_.endsWith("-1 -1")) {
+                command_.replace("-1 -1", QStringLiteral("%1 %1").arg(frame()));
+            }
+            break;
         default:
             break;
     }

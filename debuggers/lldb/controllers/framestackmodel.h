@@ -25,7 +25,13 @@
 
 #include "miframestackmodel.h"
 
-namespace KDevMI { namespace LLDB {
+namespace KDevMI {
+
+namespace MI {
+struct AsyncRecord;
+}
+
+namespace LLDB {
 
 class DebugSession;
 class LldbFrameStackModel : public MIFrameStackModel
@@ -35,11 +41,17 @@ public:
     LldbFrameStackModel(DebugSession* session);
 
     DebugSession* session();
+
 protected:
     void fetchThreads() override;
 
+private Q_SLOTS:
+    void inferiorStopped(const MI::AsyncRecord& r);
+
 private:
     void handleThreadInfo(const MI::ResultRecord& r);
+
+    int stoppedAtThread;
 };
 
 } // end of namespace LLDB

@@ -31,7 +31,7 @@ class TreeItem;
 }
 
 namespace KDevMI { namespace LLDB {
-
+class DebugSession;
 class LldbVariable : public MIVariable
 {
     Q_OBJECT
@@ -39,6 +39,10 @@ class LldbVariable : public MIVariable
 public:
     LldbVariable(KDevelop::TreeModel* model, KDevelop::TreeItem* parent,
                 const QString& expression, const QString& display = "");
+
+    void handleRawUpdate(const MI::ResultRecord &r);
+
+    static void updateAll(DebugSession *session);
 };
 
 } // end of namespace LLDB

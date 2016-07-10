@@ -36,6 +36,7 @@
     * thread-info returns malformated result
         + there should be only one 'frame' key for each thread in the list
         + there shoule be a current-thread-id field
+    * var-update doesn't support * as variable name
 
 - Data formatter for lldb
     * if this works in MI?

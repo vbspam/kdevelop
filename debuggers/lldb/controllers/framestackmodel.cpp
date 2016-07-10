@@ -45,12 +45,23 @@ using namespace KDevMI::MI;
 
 LldbFrameStackModel::LldbFrameStackModel(DebugSession *session)
     : MIFrameStackModel(session)
+    , stoppedAtThread(-1)
 {
+    connect(session, &DebugSession::inferiorStopped, this, &LldbFrameStackModel::inferiorStopped);
 }
 
 DebugSession* LldbFrameStackModel::session()
 {
     return static_cast<DebugSession *>(FrameStackModel::session());
+}
+
+void LldbFrameStackModel::inferiorStopped(const MI::AsyncRecord& r)
+{
+    if (session()->debuggerStateIsOn(s_shuttingDown)) return;
+
+    if (r.hasField("thread-id")) {
+        stoppedAtThread = r["thread-id"].toInt();
+    }
 }
 
 void LldbFrameStackModel::fetchThreads()
@@ -99,12 +110,9 @@ void LldbFrameStackModel::handleThreadInfo(const ResultRecord& r)
             setCrashedThreadIndex(currentThreadId);
         }
     }
-    // FIXME: lldb-mi doesn't have current-thread-id field. This workaround this
-    // in single threaded case
-    if (threadsList.size() == 1) {
-        setCurrentThread(threadsList[0].nr);
-        if (session()->hasCrashed()) {
-            setCrashedThreadIndex(threadsList[0].nr);
-        }
+    // lldb-mi doesn't have current-thread-id field. Use the thread-id field when inferiorStopped
+    if (stoppedAtThread != -1) {
+        setCurrentThread(stoppedAtThread);
     }
+    stoppedAtThread = -1;
 }

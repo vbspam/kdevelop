@@ -22,11 +22,34 @@
 
 #include "variable.h"
 
+#include "debuglog.h"
+#include "debugsession.h"
+#include "mi/micommand.h"
+
 using namespace KDevelop;
 using namespace KDevMI::LLDB;
+using namespace KDevMI::MI;
 
 LldbVariable::LldbVariable(TreeModel *model, TreeItem *parent,
                          const QString& expression, const QString& display)
     : MIVariable(model, parent, expression, display)
 {
+}
+
+void LldbVariable::updateAll(DebugSession *session)
+{
+    for (auto it = allVariables_.begin(); it != allVariables_.end(); ++it) {
+        LldbVariable *var = qobject_cast<LldbVariable*>(it.value());
+        session->addCommand(VarUpdate, "--all-values " + it.key(),
+                            var, &LldbVariable::handleRawUpdate);
+    }
+}
+
+void LldbVariable::handleRawUpdate(const ResultRecord& r)
+{
+    qCDebug(DEBUGGERLLDB) << "handleRawUpdate for variable" << varobj();
+    const Value& changelist = r["changelist"];
+    Q_ASSERT_X(changelist.size() == 1, "LldbVariable::handleRawUpdate",
+               "should only be used with one variable VarUpdate");
+    handleUpdate(changelist[0]);
 }
