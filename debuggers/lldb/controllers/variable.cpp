@@ -49,7 +49,8 @@ void LldbVariable::handleRawUpdate(const ResultRecord& r)
 {
     qCDebug(DEBUGGERLLDB) << "handleRawUpdate for variable" << varobj();
     const Value& changelist = r["changelist"];
-    Q_ASSERT_X(changelist.size() == 1, "LldbVariable::handleRawUpdate",
+    Q_ASSERT_X(changelist.size() <= 1, "LldbVariable::handleRawUpdate",
                "should only be used with one variable VarUpdate");
-    handleUpdate(changelist[0]);
+    if (changelist.size() == 1)
+        handleUpdate(changelist[0]);
 }

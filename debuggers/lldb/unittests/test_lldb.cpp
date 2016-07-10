@@ -1060,7 +1060,6 @@ void LldbTest::testVariablesLocals()
 
 void LldbTest::testVariablesLocalsStruct()
 {
-    QSKIP("TODO");
     TestDebugSession *session = new TestDebugSession;
     session->variableController()->setAutoUpdate(KDevelop::IVariableController::UpdateLocals);
 
