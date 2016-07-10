@@ -44,7 +44,7 @@ DebugSession *VariableController::debugSession() const
 LldbVariable* VariableController::createVariable(TreeModel* model, TreeItem* parent,
                                              const QString& expression, const QString& display)
 {
-    return new LldbVariable(model, parent, expression, display);
+    return new LldbVariable(debugSession(), model, parent, expression, display);
 }
 
 void VariableController::update()
@@ -61,6 +61,6 @@ void VariableController::update()
    if ((autoUpdate() & UpdateLocals) ||
        ((autoUpdate() & UpdateWatches) && variableCollection()->watches()->childCount() > 0))
     {
-        LldbVariable::updateAll(debugSession());
+        debugSession()->updateAllVariables();
     }
 }

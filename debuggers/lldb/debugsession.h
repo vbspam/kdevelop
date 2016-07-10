@@ -57,6 +57,8 @@ public:
     MI::MICommand *createCommand(MI::CommandType type, const QString &arguments,
                                  MI::CommandFlags flags) const override;
 
+    void updateAllVariables();
+
 public Q_SLOTS:
     void interruptDebugger() override;
 
@@ -73,8 +75,6 @@ private Q_SLOTS:
     void handleFileExecAndSymbols(const MI::ResultRecord& r);
 
 private:
-    friend class GdbTest;
-
     BreakpointController *m_breakpointController;
     VariableController *m_variableController;
     LldbFrameStackModel *m_frameStackModel;

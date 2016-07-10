@@ -30,19 +30,10 @@ using namespace KDevelop;
 using namespace KDevMI::LLDB;
 using namespace KDevMI::MI;
 
-LldbVariable::LldbVariable(TreeModel *model, TreeItem *parent,
+LldbVariable::LldbVariable(DebugSession *session, TreeModel *model, TreeItem *parent,
                          const QString& expression, const QString& display)
-    : MIVariable(model, parent, expression, display)
+    : MIVariable(session, model, parent, expression, display)
 {
-}
-
-void LldbVariable::updateAll(DebugSession *session)
-{
-    for (auto it = allVariables_.begin(); it != allVariables_.end(); ++it) {
-        LldbVariable *var = qobject_cast<LldbVariable*>(it.value());
-        session->addCommand(VarUpdate, "--all-values " + it.key(),
-                            var, &LldbVariable::handleRawUpdate);
-    }
 }
 
 void LldbVariable::handleRawUpdate(const ResultRecord& r)

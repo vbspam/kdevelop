@@ -22,6 +22,7 @@
 
 #include "debugsession.h"
 
+#include "controllers/variable.h"
 #include "dbgglobal.h"
 #include "debuglog.h"
 #include "lldbcommand.h"
@@ -244,5 +245,14 @@ void DebugSession::handleFileExecAndSymbols(const MI::ResultRecord& r)
             r["msg"].literal(),
             i18n("Startup error"));
         stopDebugger();
+    }
+}
+
+void DebugSession::updateAllVariables()
+{
+    for (auto it = m_allVariables.begin(), ite = m_allVariables.end(); it != ite; ++it) {
+        LldbVariable *var = qobject_cast<LldbVariable*>(it.value());
+        addCommand(VarUpdate, "--all-values " + it.key(),
+                   var, &LldbVariable::handleRawUpdate);
     }
 }
