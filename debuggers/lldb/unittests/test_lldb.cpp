@@ -223,7 +223,7 @@ void LldbTest::testStdout()
     QSignalSpy outputSpy(session, &TestDebugSession::inferiorStdoutLines);
 
     TestLaunchConfiguration cfg;
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, KDevelop::IDebugSession::EndedState);
 
     QCOMPARE(outputSpy.count(), 2);
@@ -245,7 +245,7 @@ void LldbTest::testBreakpoint()
     KDevelop::Breakpoint * b = breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 29);
     QCOMPARE(b->state(), KDevelop::Breakpoint::NotStartedState);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, DebugSession::PausedState);
     QCOMPARE(b->state(), KDevelop::Breakpoint::CleanState);
     QCOMPARE(session->currentLine(), 29);
@@ -270,7 +270,7 @@ void LldbTest::testBreakOnStart()
     TestLaunchConfiguration cfg;
     cfg.config().writeEntry(KDevMI::breakOnStartEntry, true);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 28); // line 28 is the start of main function in debugee.cpp
 
@@ -309,7 +309,7 @@ void LldbTest::testDisableBreakpoint()
     m_core->debugController()->breakpointModel()->blockSignals(false);
 
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), thirdBreak->line());
 
@@ -334,7 +334,7 @@ void LldbTest::testChangeLocationBreakpoint()
 
     auto *b = breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 27);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 27);
 
@@ -375,7 +375,7 @@ void LldbTest::testDeleteBreakpoint()
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 22);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     breakpoints()->removeRow(0);
     session->run();
@@ -394,7 +394,7 @@ void LldbTest::testPendingBreakpoint()
     auto * b = breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(findSourceFile("test_lldb.cpp")), 10);
     QCOMPARE(b->state(), Breakpoint::NotStartedState);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, DebugSession::PausedState);
     QCOMPARE(b->state(), Breakpoint::PendingState);
     session->run();
@@ -412,7 +412,7 @@ void LldbTest::testUpdateBreakpoint()
     auto b = breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 28);
     QCOMPARE(breakpoints()->rowCount(), 1);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState); // stop at line 29
 
@@ -449,7 +449,7 @@ void LldbTest::testIgnoreHitsBreakpoint()
 
     KDevelop::Breakpoint * b2 = breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 22);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     //WAIT_FOR_STATE(session, DebugSession::PausedState);
     WAIT_FOR(session, session->state() == DebugSession::PausedState && b2->hitCount() == 1);
@@ -474,7 +474,7 @@ void LldbTest::testConditionBreakpoint()
 
     b = breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 24);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR(session, session->state() == DebugSession::PausedState && session->currentLine() == 24);
     b->setCondition("i == 0");
@@ -501,7 +501,7 @@ void LldbTest::testBreakOnWriteBreakpoint()
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 24);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 24);
@@ -527,7 +527,7 @@ void LldbTest::testBreakOnWriteWithConditionBreakpoint()
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 24);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 24);
@@ -554,7 +554,7 @@ void LldbTest::testBreakOnReadBreakpoint()
 
     breakpoints()->addReadWatchpoint("foo::i");
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 23);
@@ -570,7 +570,7 @@ void LldbTest::testBreakOnReadBreakpoint2()
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 24);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 24);
@@ -597,7 +597,7 @@ void LldbTest::testBreakOnAccessBreakpoint()
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 24);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 24);
@@ -627,7 +627,7 @@ void LldbTest::testInsertBreakpointWhileRunning()
     TestLaunchConfiguration cfg(findExecutable("lldb_debugeeslow"));
     QString fileName = findSourceFile("debugeeslow.cpp");
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR_STATE(session, DebugSession::ActiveState);
     WAIT_FOR_A_WHILE(session, 2000);
@@ -651,7 +651,7 @@ void LldbTest::testInsertBreakpointWhileRunningMultiple()
     TestLaunchConfiguration cfg(findExecutable("lldb_debugeeslow"));
     QString fileName = findSourceFile("debugeeslow.cpp");
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
 
     WAIT_FOR_STATE(session, DebugSession::ActiveState);
     WAIT_FOR_A_WHILE(session, 2000);
@@ -685,7 +685,7 @@ void LldbTest::testInsertBreakpointFunctionName()
 
     breakpoints()->addCodeBreakpoint("main");
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 27);
 
@@ -701,7 +701,7 @@ void LldbTest::testManualBreakpoint()
 
     breakpoints()->addCodeBreakpoint("main");
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(session->currentLine(), 27);
 
@@ -745,8 +745,11 @@ void LldbTest::testInsertAndRemoveBreakpointWhileRunning()
     WAIT_FOR_A_WHILE(session, 1000);
 
     KDevelop::Breakpoint *b = breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(fileName), 25);
+    WAIT_FOR_A_WHILE(session, 200); // wait for feedback notification from lldb-mi
     b->setDeleted();
 
+
+    WAIT_FOR_A_WHILE(session, 3000); // give slow debugee extra time to run
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 }
 
@@ -982,7 +985,7 @@ void LldbTest::testShowStepInSource()
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 29);
 
-    session->startDebugging(&cfg, m_iface);
+    QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     session->stepInto();
