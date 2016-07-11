@@ -66,6 +66,17 @@ private slots:
     void testInsertBreakpointWhileRunningMultiple();
     void testInsertBreakpointFunctionName();
     void testManualBreakpoint();
+    void testInsertAndRemoveBreakpointWhileRunning();
+    void testPickupManuallyInsertedBreakpoint();
+    void testPickupManuallyInsertedBreakpointOnlyOnce();
+    void testBreakpointWithSpaceInPath();
+    void testBreakpointDisabledOnStart();
+    void testMultipleLocationsBreakpoint();
+    void testMultipleBreakpoint();
+    void testRegularExpressionBreakpoint();
+    void testChangeBreakpointWhileRunning();
+
+    void testCatchpoint();
 
     void testShowStepInSource();
 
@@ -88,6 +99,19 @@ private slots:
     void testVariablesStartSecondSession();
     void testVariablesSwitchFrame();
     void testVariablesQuicklySwitchFrame();
+    void testSwitchFrameLldbConsole();
+
+    void testSegfaultDebugee();
+
+    void testCommandOrderFastStepping();
+
+    void testRunLldbScript();
+
+    void testBug301287();
+
+    void testDebugInExternalTerminal();
+
+    void testSpecialPath();
 
 private:
     // convenient access methods

@@ -50,6 +50,12 @@ using namespace KDevMI::LLDB;
 using namespace KDevMI::MI;
 using namespace KDevelop;
 
+QString doubleQuoteArg(QString arg)
+{
+    arg.replace("\"", "\\\"");
+    return '"' + arg + '"';
+}
+
 DebugSession::DebugSession()
     : MIDebugSession()
     , m_breakpointController(nullptr)
@@ -143,7 +149,7 @@ void DebugSession::configure(ILaunchConfiguration *cfg)
 
     // custom config script
     if (configLldbScript.isValid()) {
-        addCommand(MI::NonMI, "command source -s 0" + KShell::quoteArg(configLldbScript.toLocalFile()));
+        addCommand(MI::NonMI, "command source -s TRUE " + KShell::quoteArg(configLldbScript.toLocalFile()));
     }
 
     qCDebug(DEBUGGERGDB) << "Per inferior configuration done";
@@ -207,7 +213,7 @@ bool DebugSession::execInferior(ILaunchConfiguration *cfg, const QString &execut
     */
 
     // normal local debugging
-    addCommand(MI::FileExecAndSymbols, KShell::quoteArg(executable),
+    addCommand(MI::FileExecAndSymbols, doubleQuoteArg(executable),
                this, &DebugSession::handleFileExecAndSymbols,
                CmdHandlesError);
     raiseEvent(connected_to_program);

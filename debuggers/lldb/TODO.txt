@@ -18,6 +18,12 @@
 
 - [DONE] Verify MIParser/MILexer can handle output without any stream prefix: no they can't
 
+- Remove duplicate breakpoint
+
+- Remote debug
+
+- Handle error sometime with Command 'exec-run'. Invalid process during debug session.
+
 - File bug to lldb-mi
     * HIGH PRIORITY: -break-insert
         + pending breakpoints set with '-f' not got resolved after file loaded
@@ -37,6 +43,8 @@
         + there should be only one 'frame' key for each thread in the list
         + there shoule be a current-thread-id field
     * var-update doesn't support * as variable name
+    * can't have space in environment cd
+    * File bug to lldb-mi for other missing commands
 
 - Data formatter for lldb
     * if this works in MI?
@@ -45,8 +53,6 @@
     * implement asm-demangle?
 - Fix other missing commands by using cli commands
 - Fix TODOs in files
-
-- File bug to lldb-mi for other missing commands
 
 - Change test_gdb to avoid direct use of QTest::qWait, which starts event loop, and could cause session to
   be deleted. Use WAIT_FOR_STATE_AND_IDLE(session, <previous state>) instead. Or use QPointer for session.
