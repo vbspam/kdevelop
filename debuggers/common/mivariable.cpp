@@ -67,7 +67,7 @@ MIVariable::~MIVariable()
 void MIVariable::setVarobj(const QString& v)
 {
     if (!debugSession) {
-        qCDebug(DEBUGGERCOMMON) << "WARNING: MIVariable::setVarobj called when its session died";
+        qCWarning(DEBUGGERCOMMON) << "MIVariable::setVarobj called when its session died";
         return;
     }
     if (!varobj_.isEmpty()) {
