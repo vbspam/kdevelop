@@ -36,6 +36,7 @@
 #include <interfaces/iplugincontroller.h>
 #include <tests/autotestshell.h>
 #include <tests/testcore.h>
+#include <util/environmentgrouplist.h>
 
 #include <KConfigGroup>
 #include <KIO/Global>
@@ -43,6 +44,7 @@
 
 #include <QFileInfo>
 #include <QSignalSpy>
+#include <QStringList>
 #include <QTest>
 #include <QTemporaryFile>
 #include <QUrl>
@@ -78,6 +80,16 @@ using namespace KDevelop;
 using namespace KDevMI::LLDB;
 
 namespace {
+class WritableEnvironmentGroupList : public EnvironmentGroupList
+{
+public:
+    explicit WritableEnvironmentGroupList(KConfig* config) : EnvironmentGroupList(config) {}
+
+    using EnvironmentGroupList::variables;
+    using EnvironmentGroupList::saveSettings;
+    using EnvironmentGroupList::removeGroup;
+};
+
 class TestLaunchConfiguration : public ILaunchConfiguration
 {
 public:
@@ -90,6 +102,11 @@ public:
         cfg.writeEntry("isExecutable", true);
         cfg.writeEntry("Executable", executable);
         cfg.writeEntry("Working Directory", workingDirectory);
+
+        WritableEnvironmentGroupList groupList(c);
+        groupList.removeGroup("LldbTestGroup");
+        groupList.variables("LldbTestGroup")["VariableA"] = "A good value";
+        groupList.saveSettings(c);
     }
     ~TestLaunchConfiguration() override {
         delete c;
@@ -236,6 +253,23 @@ void LldbTest::testStdout()
     QCOMPARE(arguments.first().toStringList(), QStringList() << "Hello");
 }
 
+void LldbTest::testEnvironmentSet()
+{
+    TestDebugSession *session = new TestDebugSession;
+    TestLaunchConfiguration cfg(findExecutable("lldb_debugeeechoenv"));
+    cfg.config().writeEntry("EnvironmentGroup", "LldbTestGroup");
+
+    QSignalSpy outputSpy(session, &TestDebugSession::inferiorStdoutLines);
+
+    QVERIFY(session->startDebugging(&cfg, m_iface));
+    WAIT_FOR_STATE(session, KDevelop::IDebugSession::EndedState);
+
+    QCOMPARE(outputSpy.count(), 1);
+    QList<QVariant> arguments = outputSpy.takeFirst();
+    QCOMPARE(arguments.count(), 1);
+    QCOMPARE(arguments.first().toStringList(), QStringList() << "A good value");
+}
+
 void LldbTest::testBreakpoint()
 {
     TestDebugSession *session = new TestDebugSession;
@@ -246,15 +280,15 @@ void LldbTest::testBreakpoint()
     QCOMPARE(b->state(), KDevelop::Breakpoint::NotStartedState);
 
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
     QCOMPARE(b->state(), KDevelop::Breakpoint::CleanState);
     QCOMPARE(session->currentLine(), 29);
 
     session->stepInto();
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     session->stepInto();
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     session->run();
     WAIT_FOR_STATE(session, DebugSession::EndedState);

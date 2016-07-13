@@ -47,6 +47,7 @@ private slots:
     void cleanup();
 
     void testStdout();
+    void testEnvironmentSet();
 
     void testBreakpoint();
     void testBreakOnStart();
