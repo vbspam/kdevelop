@@ -1,5 +1,5 @@
 /*
- * <one line to give the program's name and a brief idea of what it does.>
+ * LLDB specific version of MI command
  * Copyright 2016  Aetf <aetf@unlimitedcodeworks.xyz>
  *
  * This program is free software; you can redistribute it and/or
