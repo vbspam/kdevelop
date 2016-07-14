@@ -65,9 +65,10 @@ public Q_SLOTS:
 protected:
     LldbDebugger *createDebugger() const override;
     void initializeDebugger() override;
-    bool execInferior(KDevelop::ILaunchConfiguration *cfg, const QString &executable) override;
+    bool execInferior(KDevelop::ILaunchConfiguration *cfg, IExecutePlugin *iexec,
+                      const QString &executable) override;
 
-    void configure(KDevelop::ILaunchConfiguration *cfg);
+    void configure(KDevelop::ILaunchConfiguration *cfg, IExecutePlugin *iexec);
 
     void ensureDebuggerListening() override;
 

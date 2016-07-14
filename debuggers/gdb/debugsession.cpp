@@ -35,9 +35,11 @@
 
 #include <debugger/breakpoint/breakpoint.h>
 #include <debugger/breakpoint/breakpointmodel.h>
+#include <execute/iexecuteplugin.h>
 #include <interfaces/icore.h>
 #include <interfaces/idebugcontroller.h>
 #include <interfaces/ilaunchconfiguration.h>
+#include <util/environmentgrouplist.h>
 
 #include <KLocalizedString>
 #include <KMessageBox>
@@ -123,7 +125,7 @@ void DebugSession::initializeDebugger()
     qCDebug(DEBUGGERGDB) << "Initialized GDB";
 }
 
-void DebugSession::configure(ILaunchConfiguration *cfg)
+void DebugSession::configure(ILaunchConfiguration *cfg, IExecutePlugin *iexec)
 {
     // Read Configuration values
     KConfigGroup grp = cfg->config();
@@ -161,15 +163,29 @@ void DebugSession::configure(ILaunchConfiguration *cfg)
         addCommand(MI::GdbSet, "print asm-demangle off");
     }
 
+    // Set the environment variables
+    EnvironmentGroupList l(KSharedConfig::openConfig());
+    QString envgrp = iexec->environmentGroup(cfg);
+    if (envgrp.isEmpty()) {
+        qCWarning(DEBUGGERCOMMON) << i18n("No environment group specified, looks like a broken "
+                                          "configuration, please check run configuration '%1'. "
+                                          "Using default environment group.", cfg->name());
+        envgrp = l.defaultGroup();
+    }
+    for (const auto &envvar : l.createEnvironment(envgrp, {})) {
+        addCommand(GdbSet, "environment " + envvar);
+    }
+
     qCDebug(DEBUGGERGDB) << "Per inferior configuration done";
 }
 
-bool DebugSession::execInferior(ILaunchConfiguration *cfg, const QString &executable)
+bool DebugSession::execInferior(ILaunchConfiguration *cfg, IExecutePlugin *iexec,
+                                const QString &executable)
 {
     qCDebug(DEBUGGERGDB) << "Executing inferior";
 
     // debugger specific config
-    configure(cfg);
+    configure(cfg, iexec);
 
     KConfigGroup grp = cfg->config();
     QUrl configGdbScript = grp.readEntry(KDevMI::remoteGdbConfigEntry, QUrl());

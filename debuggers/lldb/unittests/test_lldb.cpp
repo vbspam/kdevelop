@@ -102,11 +102,6 @@ public:
         cfg.writeEntry("isExecutable", true);
         cfg.writeEntry("Executable", executable);
         cfg.writeEntry("Working Directory", workingDirectory);
-
-        WritableEnvironmentGroupList groupList(c);
-        groupList.removeGroup("LldbTestGroup");
-        groupList.variables("LldbTestGroup")["VariableA"] = "A good value";
-        groupList.saveSettings(c);
     }
     ~TestLaunchConfiguration() override {
         delete c;
@@ -116,6 +111,8 @@ public:
     QString name() const override { return QString("Test-Launch"); }
     KDevelop::IProject* project() const override { return 0; }
     KDevelop::LaunchConfigurationType* type() const override { return 0; }
+
+    KConfig *rootConfig() { return c; }
 private:
     KConfigGroup cfg;
     KConfig *c;
@@ -257,17 +254,29 @@ void LldbTest::testEnvironmentSet()
 {
     TestDebugSession *session = new TestDebugSession;
     TestLaunchConfiguration cfg(findExecutable("lldb_debugeeechoenv"));
+
     cfg.config().writeEntry("EnvironmentGroup", "LldbTestGroup");
+
+    WritableEnvironmentGroupList envGroups(cfg.rootConfig());
+    envGroups.removeGroup("LldbTestGroup");
+    auto &envs = envGroups.variables("LldbTestGroup");
+    envs["VariableA"] = "-A' \" complex --value";
+    envs["VariableB"] = "-B' \" complex --value";
+    envGroups.saveSettings(cfg.rootConfig());
 
     QSignalSpy outputSpy(session, &TestDebugSession::inferiorStdoutLines);
 
     QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, KDevelop::IDebugSession::EndedState);
 
-    QCOMPARE(outputSpy.count(), 1);
+    QCOMPARE(outputSpy.count(), 2);
     QList<QVariant> arguments = outputSpy.takeFirst();
     QCOMPARE(arguments.count(), 1);
-    QCOMPARE(arguments.first().toStringList(), QStringList() << "A good value");
+    QCOMPARE(arguments.first().toStringList(), QStringList() << "-A' \" complex --value");
+
+    arguments = outputSpy.takeFirst();
+    QCOMPARE(arguments.count(), 1);
+    QCOMPARE(arguments.first().toStringList(), QStringList() << "-B' \" complex --value");
 }
 
 void LldbTest::testBreakpoint()

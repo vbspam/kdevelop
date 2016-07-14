@@ -38,6 +38,7 @@
 #include <tests/autotestshell.h>
 #include <tests/testcore.h>
 #include <shell/shellextension.h>
+#include <util/environmentgrouplist.h>
 
 #include <KIO/Global>
 #include <KProcess>
@@ -126,6 +127,16 @@ void GdbTest::init()
     vc->watches()->clear();
 }
 
+class WritableEnvironmentGroupList : public KDevelop::EnvironmentGroupList
+{
+public:
+    explicit WritableEnvironmentGroupList(KConfig* config) : EnvironmentGroupList(config) {}
+
+    using EnvironmentGroupList::variables;
+    using EnvironmentGroupList::saveSettings;
+    using EnvironmentGroupList::removeGroup;
+};
+
 class TestLaunchConfiguration : public KDevelop::ILaunchConfiguration
 {
 public:
@@ -147,6 +158,8 @@ public:
     QString name() const override { return QString("Test-Launch"); }
     KDevelop::IProject* project() const override { return 0; }
     KDevelop::LaunchConfigurationType* type() const override { return 0; }
+
+    KConfig *rootConfig() { return c; }
 private:
     KConfigGroup cfg;
     KConfig *c;
@@ -287,6 +300,35 @@ void GdbTest::testStdOut()
         QCOMPARE(arguments.count(), 1);
         QCOMPARE(arguments.first().toStringList(), QStringList() << "Hello, world!" << "Hello");
     }
+}
+
+void GdbTest::testEnvironmentSet()
+{
+    TestDebugSession *session = new TestDebugSession;
+    TestLaunchConfiguration cfg(findExecutable("debugeeechoenv"));
+
+    cfg.config().writeEntry("EnvironmentGroup", "GdbTestGroup");
+
+    WritableEnvironmentGroupList envGroups(cfg.rootConfig());
+    envGroups.removeGroup("GdbTestGroup");
+    auto &envs = envGroups.variables("GdbTestGroup");
+    envs["VariableA"] = "-A' \" complex --value";
+    envs["VariableB"] = "-B' \" complex --value";
+    envGroups.saveSettings(cfg.rootConfig());
+
+    QSignalSpy outputSpy(session, &TestDebugSession::inferiorStdoutLines);
+
+    QVERIFY(session->startDebugging(&cfg, m_iface));
+    WAIT_FOR_STATE(session, KDevelop::IDebugSession::EndedState);
+
+    QCOMPARE(outputSpy.count(), 2);
+    QList<QVariant> arguments = outputSpy.takeFirst();
+    QCOMPARE(arguments.count(), 1);
+    QCOMPARE(arguments.first().toStringList(), QStringList() << "-A' \" complex --value");
+
+    arguments = outputSpy.takeFirst();
+    QCOMPARE(arguments.count(), 1);
+    QCOMPARE(arguments.first().toStringList(), QStringList() << "-B' \" complex --value");
 }
 
 void GdbTest::testBreakpoint()

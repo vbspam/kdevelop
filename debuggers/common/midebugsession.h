@@ -275,7 +275,8 @@ protected:
     /**
      * Further config the debugger and start the inferior program (either local or remote).
      */
-    virtual bool execInferior(KDevelop::ILaunchConfiguration *cfg, const QString &executable) = 0;
+    virtual bool execInferior(KDevelop::ILaunchConfiguration *cfg, IExecutePlugin *iexec,
+                              const QString &executable) = 0;
 
     /**
      * Manipulate debugger instance state

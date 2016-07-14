@@ -31,9 +31,11 @@
 
 #include <debugger/breakpoint/breakpoint.h>
 #include <debugger/breakpoint/breakpointmodel.h>
+#include <execute/iexecuteplugin.h>
 #include <interfaces/icore.h>
 #include <interfaces/idebugcontroller.h>
 #include <interfaces/ilaunchconfiguration.h>
+#include <util/environmentgrouplist.h>
 
 #include <KConfigGroup>
 #include <KLocalizedString>
@@ -119,7 +121,7 @@ void DebugSession::initializeDebugger()
     qCDebug(DEBUGGERLLDB) << "Initialized LLDB";
 }
 
-void DebugSession::configure(ILaunchConfiguration *cfg)
+void DebugSession::configure(ILaunchConfiguration *cfg, IExecutePlugin *)
 {
     // Read Configuration values
     KConfigGroup grp = cfg->config();
@@ -155,12 +157,13 @@ void DebugSession::configure(ILaunchConfiguration *cfg)
     qCDebug(DEBUGGERGDB) << "Per inferior configuration done";
 }
 
-bool DebugSession::execInferior(ILaunchConfiguration *cfg, const QString &executable)
+bool DebugSession::execInferior(ILaunchConfiguration *cfg, IExecutePlugin *iexec,
+                                const QString &executable)
 {
     qCDebug(DEBUGGERGDB) << "Executing inferior";
 
     // debugger specific config
-    configure(cfg);
+    configure(cfg, iexec);
 
     // config that can't be placed in configure()
     KConfigGroup grp = cfg->config();
@@ -217,6 +220,25 @@ bool DebugSession::execInferior(ILaunchConfiguration *cfg, const QString &execut
                this, &DebugSession::handleFileExecAndSymbols,
                CmdHandlesError);
     raiseEvent(connected_to_program);
+
+    // Set the environment variables has effect only after setting the executable
+    EnvironmentGroupList l(KSharedConfig::openConfig());
+    QString envgrp = iexec->environmentGroup(cfg);
+    if (envgrp.isEmpty()) {
+        qCWarning(DEBUGGERCOMMON) << i18n("No environment group specified, looks like a broken "
+                                          "configuration, please check run configuration '%1'. "
+                                          "Using default environment group.", cfg->name());
+        envgrp = l.defaultGroup();
+    }
+    const auto &const_l = l;
+    QStringList vars;
+    for (auto it = const_l.variables(envgrp).constBegin(),
+              ite = const_l.variables(envgrp).constEnd();
+         it != ite; ++it) {
+        vars.append(QStringLiteral("%0=%1").arg(it.key(), doubleQuoteArg(it.value())));
+    }
+    // actually using lldb command 'settings set target.env-vars' which accepts multiple values
+    addCommand(GdbSet, "environment " + vars.join(" "));
 
     addCommand(new SentinelCommand([this]() {
         breakpointController()->initSendBreakpoints();

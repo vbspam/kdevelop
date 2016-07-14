@@ -75,9 +75,10 @@ public:
 protected:
     GdbDebugger *createDebugger() const override;
     void initializeDebugger() override;
-    bool execInferior(KDevelop::ILaunchConfiguration *cfg, const QString &executable) override;
+    bool execInferior(KDevelop::ILaunchConfiguration *cfg, IExecutePlugin *iexec,
+                      const QString &executable) override;
 
-    void configure(KDevelop::ILaunchConfiguration *cfg);
+    void configure(KDevelop::ILaunchConfiguration *cfg, IExecutePlugin *iexec);
 
 private Q_SLOTS:
     void handleVersion(const QStringList& s);

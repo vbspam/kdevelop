@@ -44,7 +44,6 @@
 #include <interfaces/idocument.h>
 #include <interfaces/idocumentcontroller.h>
 #include <interfaces/ilaunchconfiguration.h>
-#include <util/environmentgrouplist.h>
 #include <util/processlinemaker.h>
 
 #include <KConfigGroup>
@@ -266,25 +265,12 @@ bool MIDebugSession::startDebugging(ILaunchConfiguration* cfg, IExecutePlugin* i
     }
     addCommand(EnvironmentCd, '"' + dir + '"');
 
-    // Set the environment variables
-    EnvironmentGroupList l(KSharedConfig::openConfig());
-    QString envgrp = iexec->environmentGroup(cfg);
-    if (envgrp.isEmpty()) {
-        qCWarning(DEBUGGERCOMMON) << i18n("No environment group specified, looks like a broken "
-                                          "configuration, please check run configuration '%1'. "
-                                          "Using default environment group.", cfg->name());
-        envgrp = l.defaultGroup();
-    }
-    for (const auto &envvar : l.createEnvironment(envgrp, {})) {
-        addCommand(GdbSet, "environment " + envvar);
-    }
-
     // Set the run arguments
     if (!arguments.isEmpty())
         addCommand(ExecArguments, KShell::joinArgs(arguments));
 
     // Do other debugger specific config options and actually start the inferior program
-    if (!execInferior(cfg, executable)) {
+    if (!execInferior(cfg, iexec, executable)) {
         return false;
     }
 
