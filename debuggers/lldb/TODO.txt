@@ -11,10 +11,9 @@
 - [DONE] Verify how unit test works in test_gdb
 - [DONE] Create minimal unit test cases to be able to test debugger and debugsession
     + [DONE] can break on start
-    + environment var successfully set
+    + [DONE] environment var successfully set
     + Check if lldb supports unicode correctly
         * a program output in encoding other than utf8 and different from host system default
-    + set-tty actually works
 
 - [DONE] Verify MIParser/MILexer can handle output without any stream prefix: no they can't
 
@@ -41,9 +40,11 @@
     * when hit watch point, nothing is output, which confuses the controller
     * thread-info returns malformated result
         + there should be only one 'frame' key for each thread in the list
-        + there shoule be a current-thread-id field
+        + there shoule be a current-thread-id field (fixed at least in revision 265858)
     * var-update doesn't support * as variable name
     * can't have space in environment cd
+    * -inferior-tty-set only has dummy implementation
+    * 'process launch' doesn't provide thread-group-started notification
     * File bug to lldb-mi for other missing commands
 
 - Data formatter for lldb

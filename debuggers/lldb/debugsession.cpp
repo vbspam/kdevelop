@@ -242,7 +242,21 @@ bool DebugSession::execInferior(ILaunchConfiguration *cfg, IExecutePlugin *iexec
 
     addCommand(new SentinelCommand([this]() {
         breakpointController()->initSendBreakpoints();
-        addCommand(MI::ExecRun, QString(), CmdMaybeStartsRunning);
+        // FIXME: a hacky way to emulate tty setting on linux. Not sure if this provides all needed
+        // functionalities of a pty. Should make this conditional on other platforms.
+        // FIXME: 'process launch' doesn't provide thread-group-started notification which MIDebugSession
+        // relies on to know the inferior has been started
+        QPointer<DebugSession> guarded_this(this);
+        addCommand(MI::NonMI,
+                   QStringLiteral("process launch --stdin %0 --stdout %0 --stderr %0").arg(m_tty->getSlave()),
+                   [guarded_this](const MI::ResultRecord &r) {
+                       qCDebug(DEBUGGERLLDB) << "process launched:" << r.reason;
+                       if (guarded_this)
+                           guarded_this->setDebuggerStateOff(s_appNotStarted | s_programExited);
+                   },
+                   CmdMaybeStartsRunning);
+
+        //addCommand(MI::ExecRun, QString(), CmdMaybeStartsRunning);
     }, CmdMaybeStartsRunning));
     return true;
 }

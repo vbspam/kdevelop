@@ -1789,8 +1789,6 @@ void LldbTest::testBug301287()
 
 void LldbTest::testDebugInExternalTerminal()
 {
-    QSKIP("Skipping... Not implemented");
-
     TestLaunchConfiguration cfg;
 
     foreach (const QString & console, QStringList() << "konsole" << "xterm" << "xfce4-terminal" << "gnome-terminal") {
