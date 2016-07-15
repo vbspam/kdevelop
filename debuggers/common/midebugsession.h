@@ -87,6 +87,11 @@ Q_SIGNALS:
     void debuggerInternalCommandOutput(const QString &output);
 
     /**
+     * Emits when received internal output from debugger
+     */
+    void debuggerInternalOutput(const QString &output);
+
+    /**
      * Emits when received standard output from inferior's tty
      */
     void inferiorTtyStdout(const QByteArray &output);
@@ -215,7 +220,7 @@ public:
                     MI::CommandFlags flags = 0);
 
     QMap<QString, MIVariable*> & variableMapping();
-    MIVariable* findVariableByVarobjName(const QString &varobjName);
+    MIVariable* findVariableByVarobjName(const QString &varobjName) const;
     void markAllVariableDead();
 
 protected Q_SLOTS:

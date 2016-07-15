@@ -119,11 +119,11 @@ QMap<QString, MIVariable*> & MIDebugSession::variableMapping()
     return m_allVariables;
 }
 
-MIVariable* MIDebugSession::findVariableByVarobjName(const QString &varobjName)
+MIVariable* MIDebugSession::findVariableByVarobjName(const QString &varobjName) const
 {
     if (m_allVariables.count(varobjName) == 0)
         return nullptr;
-    return m_allVariables[varobjName];
+    return m_allVariables.value(varobjName);
 }
 
 void MIDebugSession::markAllVariableDead()
@@ -170,6 +170,7 @@ bool MIDebugSession::startDebugger(ILaunchConfiguration *cfg)
             });
     connect(m_debugger, &MIDebugger::userCommandOutput, this, &MIDebugSession::debuggerUserCommandOutput);
     connect(m_debugger, &MIDebugger::internalCommandOutput, this, &MIDebugSession::debuggerInternalCommandOutput);
+    connect(m_debugger, &MIDebugger::debuggerInternalOutput, this, &MIDebugSession::debuggerInternalOutput);
 
     // state signals
     connect(m_debugger, &MIDebugger::programStopped, this, &MIDebugSession::inferiorStopped);
