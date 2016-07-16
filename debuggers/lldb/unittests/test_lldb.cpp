@@ -311,7 +311,7 @@ void LldbTest::testBreakOnStart()
     TestDebugSession *session = new TestDebugSession;
 
     TestLaunchConfiguration cfg;
-    cfg.config().writeEntry(KDevMI::breakOnStartEntry, true);
+    cfg.config().writeEntry(KDevMI::Config::BreakOnStartEntry, true);
 
     QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, DebugSession::PausedState);
@@ -832,7 +832,7 @@ void LldbTest::testPickupManuallyInsertedBreakpointOnlyOnce()
 
     TestLaunchConfiguration cfg;
     KConfigGroup grp = cfg.config();
-    grp.writeEntry(KDevMI::customLldbConfigEntry, QUrl::fromLocalFile(configScript.fileName()));
+    grp.writeEntry(Config::ldbConfigScriptEntry, QUrl::fromLocalFile(configScript.fileName()));
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile("debugee.cpp"), 31);
 
@@ -1736,7 +1736,7 @@ void LldbTest::testRunLldbScript()
 
     TestLaunchConfiguration cfg;
     KConfigGroup grp = cfg.config();
-    grp.writeEntry(customLldbConfigEntry, QUrl::fromLocalFile(runScript.fileName()));
+    grp.writeEntry(Config::ldbConfigScriptEntry, QUrl::fromLocalFile(runScript.fileName()));
 
     QVERIFY(session->startDebugging(&cfg, m_iface));
 

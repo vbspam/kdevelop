@@ -1031,7 +1031,7 @@ void GdbTest::testManualAttach()
     TestDebugSession *session = new TestDebugSession;
 
     TestLaunchConfiguration cfg;
-    cfg.config().writeEntry(remoteGdbRunEntry, QUrl::fromLocalFile(findSourceFile("gdb_script_empty")));
+    cfg.config().writeEntry(Config::RemoteGdbRunEntry, QUrl::fromLocalFile(findSourceFile("gdb_script_empty")));
     QVERIFY(session->startDebugging(&cfg, m_iface));
 
     session->addCommand(MI::NonMI, QString("attach %0").arg(debugeeProcess.pid()));
@@ -1520,7 +1520,7 @@ void GdbTest::testPickupManuallyInsertedBreakpointOnlyOnce()
 
     TestLaunchConfiguration cfg;
     KConfigGroup grp = cfg.config();
-    grp.writeEntry(remoteGdbConfigEntry, QUrl::fromLocalFile(configScript.fileName()));
+    grp.writeEntry(Config::RemoteGdbConfigEntry, QUrl::fromLocalFile(configScript.fileName()));
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile("debugee.cpp"), 31);
     QVERIFY(session->startDebugging(&cfg, m_iface));
@@ -1541,7 +1541,7 @@ void GdbTest::testPickupCatchThrowOnlyOnce()
 
     TestLaunchConfiguration cfg;
     KConfigGroup grp = cfg.config();
-    grp.writeEntry(remoteGdbConfigEntry, QUrl::fromLocalFile(configScript.fileName()));
+    grp.writeEntry(Config::RemoteGdbConfigEntry, QUrl::fromLocalFile(configScript.fileName()));
 
 
     for (int i = 0; i < 2; ++i) {
@@ -1567,7 +1567,7 @@ void GdbTest::testRunGdbScript()
 
     TestLaunchConfiguration cfg;
     KConfigGroup grp = cfg.config();
-    grp.writeEntry(remoteGdbRunEntry, QUrl::fromLocalFile(runScript.fileName()));
+    grp.writeEntry(Config::RemoteGdbRunEntry, QUrl::fromLocalFile(runScript.fileName()));
 
     QVERIFY(session->startDebugging(&cfg, m_iface));
 
@@ -1605,8 +1605,8 @@ void GdbTest::testRemoteDebug()
 
     TestLaunchConfiguration cfg;
     KConfigGroup grp = cfg.config();
-    grp.writeEntry(remoteGdbShellEntry, QUrl::fromLocalFile((shellScript.fileName()+"-copy")));
-    grp.writeEntry(remoteGdbRunEntry, QUrl::fromLocalFile(runScript.fileName()));
+    grp.writeEntry(Config::RemoteGdbShellEntry, QUrl::fromLocalFile((shellScript.fileName()+"-copy")));
+    grp.writeEntry(Config::RemoteGdbRunEntry, QUrl::fromLocalFile(runScript.fileName()));
 
     QVERIFY(session->startDebugging(&cfg, m_iface));
 
@@ -1649,8 +1649,8 @@ void GdbTest::testRemoteDebugInsertBreakpoint()
 
     TestLaunchConfiguration cfg;
     KConfigGroup grp = cfg.config();
-    grp.writeEntry(remoteGdbShellEntry, QUrl::fromLocalFile(shellScript.fileName()+"-copy"));
-    grp.writeEntry(remoteGdbRunEntry, QUrl::fromLocalFile(runScript.fileName()));
+    grp.writeEntry(Config::RemoteGdbShellEntry, QUrl::fromLocalFile(shellScript.fileName()+"-copy"));
+    grp.writeEntry(Config::RemoteGdbRunEntry, QUrl::fromLocalFile(runScript.fileName()));
 
     QVERIFY(session->startDebugging(&cfg, m_iface));
 
@@ -1700,8 +1700,8 @@ void GdbTest::testRemoteDebugInsertBreakpointPickupOnlyOnce()
 
     TestLaunchConfiguration cfg;
     KConfigGroup grp = cfg.config();
-    grp.writeEntry(remoteGdbShellEntry, QUrl::fromLocalFile((shellScript.fileName()+"-copy")));
-    grp.writeEntry(remoteGdbRunEntry, QUrl::fromLocalFile(runScript.fileName()));
+    grp.writeEntry(Config::RemoteGdbShellEntry, QUrl::fromLocalFile((shellScript.fileName()+"-copy")));
+    grp.writeEntry(Config::RemoteGdbRunEntry, QUrl::fromLocalFile(runScript.fileName()));
 
     QVERIFY(session->startDebugging(&cfg, m_iface));
 

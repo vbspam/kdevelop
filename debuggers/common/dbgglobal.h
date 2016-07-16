@@ -51,19 +51,28 @@ enum DataType { typeUnknown, typeValue, typePointer, typeReference,
             typeName };
 
 // FIXME: find a more appropriate place for these strings. Possibly a place specific to debugger backend
-static const char gdbPathEntry[] = "GDB Path";
-static const char debuggerShellEntry[] = "Debugger Shell";
-static const char remoteGdbConfigEntry[] = "Remote GDB Config Script";
-static const char remoteGdbShellEntry[] = "Remote GDB Shell Script";
-static const char remoteGdbRunEntry[] = "Remote GDB Run Script";
-static const char staticMembersEntry[] = "Display Static Members";
-static const char demangleNamesEntry[] = "Display Demangle Names";
-static const char allowForcedBPEntry[] = "Allow Forced Breakpoint Set";
-static const char startWithEntry[] = "Start With";
-static const char breakOnStartEntry[] = "Break on Start";
+namespace Config {
+static const char StartWithEntry[] = "Start With";
+static const char BreakOnStartEntry[] = "Break on Start";
+}
 
-static const char lldbPathEntry[] = "LLDB Path";
-static const char customLldbConfigEntry[] = "LLDB Config Script";
+namespace GDB { namespace Config {
+static const char GdbPathEntry[] = "GDB Path";
+static const char DebuggerShellEntry[] = "Debugger Shell";
+static const char RemoteGdbConfigEntry[] = "Remote GDB Config Script";
+static const char RemoteGdbShellEntry[] = "Remote GDB Shell Script";
+static const char RemoteGdbRunEntry[] = "Remote GDB Run Script";
+static const char StaticMembersEntry[] = "Display Static Members";
+static const char DemangleNamesEntry[] = "Display Demangle Names";
+static const char AllowForcedBPEntry[] = "Allow Forced Breakpoint Set";
+}
+}
+
+namespace LLDB { namespace Config {
+static const char LldbPathEntry[] = "LLDB Path";
+static const char ldbConfigScriptEntry[] = "LLDB Config Script";
+}
+}
 
 } // end of namespace KDevMI
 

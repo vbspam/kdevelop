@@ -50,7 +50,7 @@ LldbDebugger::~LldbDebugger()
 
 bool LldbDebugger::start(KConfigGroup& config, const QStringList& extraArguments)
 {
-    QUrl lldbUrl = config.readEntry(lldbPathEntry, QUrl());
+    QUrl lldbUrl = config.readEntry(Config::LldbPathEntry, QUrl());
     if (!lldbUrl.isValid() || !lldbUrl.isLocalFile()) {
         debuggerBinary_ = "lldb-mi";
     } else {

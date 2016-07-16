@@ -125,11 +125,11 @@ void DebugSession::configure(ILaunchConfiguration *cfg, IExecutePlugin *)
 {
     // Read Configuration values
     KConfigGroup grp = cfg->config();
-    QUrl configLldbScript = grp.readEntry(KDevMI::customLldbConfigEntry, QUrl());
+    QUrl configLldbScript = grp.readEntry(Config::ldbConfigScriptEntry, QUrl());
 
     // break on start: can't use "-exec-run --start" because in lldb-mi
     // the inferior stops without any notification
-    bool breakOnStart = grp.readEntry(KDevMI::breakOnStartEntry, false);
+    bool breakOnStart = grp.readEntry(KDevMI::Config::BreakOnStartEntry, false);
     if (breakOnStart) {
         BreakpointModel* m = ICore::self()->debugController()->breakpointModel();
         bool found = false;

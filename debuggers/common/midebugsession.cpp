@@ -275,7 +275,7 @@ bool MIDebugSession::startDebugging(ILaunchConfiguration* cfg, IExecutePlugin* i
         return false;
     }
 
-    QString config_startWith = cfg->config().readEntry(startWithEntry, QStringLiteral("ApplicationOutput"));
+    QString config_startWith = cfg->config().readEntry(Config::StartWithEntry, QStringLiteral("ApplicationOutput"));
     if (config_startWith == "GdbConsole") {
         emit raiseDebuggerConsoleViews();
     } else if (config_startWith == "FrameStack") {
