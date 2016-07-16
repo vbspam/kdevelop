@@ -125,7 +125,7 @@ void DebugSession::configure(ILaunchConfiguration *cfg, IExecutePlugin *)
 {
     // Read Configuration values
     KConfigGroup grp = cfg->config();
-    QUrl configLldbScript = grp.readEntry(Config::ldbConfigScriptEntry, QUrl());
+    QUrl configLldbScript = grp.readEntry(Config::LldbConfigScriptEntry, QUrl());
 
     // break on start: can't use "-exec-run --start" because in lldb-mi
     // the inferior stops without any notification

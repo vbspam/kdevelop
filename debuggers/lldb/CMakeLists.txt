@@ -9,9 +9,12 @@ set(kdevlldb_SRCS
     controllers/variablecontroller.cpp
     controllers/variable.cpp
     controllers/framestackmodel.cpp
+    widgets/lldbconfigpage.cpp
+    lldblauncher.cpp
 )
 
 set(kdevlldb_UI
+    widgets/lldbconfigpage.ui
 )
 
 ki18n_wrap_ui(kdevlldb_SRCS ${kdevlldb_UI})
@@ -23,8 +26,12 @@ target_link_libraries(kdevlldb_static
     PUBLIC
     kdevdebuggercommon
     KDev::Debugger
+    KDev::Interfaces
     PRIVATE
     Qt5::Core
+    Qt5::Gui
+    KF5::KIOWidgets
+    KDev::Shell
 )
 
 # The actual plugin

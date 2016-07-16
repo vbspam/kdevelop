@@ -69,8 +69,13 @@ static const char AllowForcedBPEntry[] = "Allow Forced Breakpoint Set";
 }
 
 namespace LLDB { namespace Config {
-static const char LldbPathEntry[] = "LLDB Path";
-static const char ldbConfigScriptEntry[] = "LLDB Config Script";
+static const char LldbExecutableEntry[] = "LLDB Executable";
+static const char LldbArgumentsEntry[] = "LLDB Arguments";
+static const char LldbEnvironmentEntry[] = "LLDB Environment";
+static const char LldbConfigScriptEntry[] = "LLDB Config Script";
+static const char LldbRemoteDebuggingEntry[] = "LLDB Remote Debugging";
+static const char LldbRemoteServerEntry[] = "LLDB Remote Server";
+static const char LldbRemoteAttachEntry[] = "LLDB Remote Attach";
 }
 }
 
