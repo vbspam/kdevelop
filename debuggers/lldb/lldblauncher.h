@@ -28,11 +28,11 @@
 class IExecutePlugin;
 namespace KDevMI { namespace LLDB {
 
-class CppDebuggerPlugin;
+class LldbDebuggerPlugin;
 class LldbLauncher : public KDevelop::ILauncher
 {
 public:
-    LldbLauncher(CppDebuggerPlugin *plugin, IExecutePlugin *iexec);
+    LldbLauncher(LldbDebuggerPlugin *plugin, IExecutePlugin *iexec);
     QList<KDevelop::LaunchConfigurationPageFactory*> configPages() const override;
     QString description() const override;
     QString id() override;
@@ -42,7 +42,7 @@ public:
 
 private:
     QList<KDevelop::LaunchConfigurationPageFactory*> m_factoryList;
-    CppDebuggerPlugin *m_plugin;
+    LldbDebuggerPlugin *m_plugin;
     IExecutePlugin *m_iexec;
 };
 

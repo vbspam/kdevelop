@@ -43,7 +43,7 @@ using namespace KDevelop;
 using namespace KDevMI;
 using namespace KDevMI::LLDB;
 
-KDevMI::LLDB::LldbLauncher::LldbLauncher(CppDebuggerPlugin *plugin, IExecutePlugin *iexec)
+KDevMI::LLDB::LldbLauncher::LldbLauncher(LldbDebuggerPlugin *plugin, IExecutePlugin *iexec)
     : m_plugin(plugin)
     , m_iexec(iexec)
 {
