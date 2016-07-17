@@ -25,6 +25,8 @@
 #include "dbgglobal.h"
 #include "debuglog.h"
 
+#include <util/environmentgrouplist.h>
+
 #include <KConfig>
 #include <KConfigGroup>
 #include <KLocalizedString>
@@ -36,6 +38,7 @@
 #include <QRegularExpression>
 #include <QUrl>
 
+using namespace KDevelop;
 using namespace KDevMI::LLDB;
 using namespace KDevMI::MI;
 
@@ -50,6 +53,7 @@ LldbDebugger::~LldbDebugger()
 
 bool LldbDebugger::start(KConfigGroup& config, const QStringList& extraArguments)
 {
+    // Get path to executable
     QUrl lldbUrl = config.readEntry(Config::LldbExecutableEntry, QUrl());
     if (!lldbUrl.isValid() || !lldbUrl.isLocalFile()) {
         debuggerBinary_ = "lldb-mi";
@@ -61,11 +65,24 @@ bool LldbDebugger::start(KConfigGroup& config, const QStringList& extraArguments
         return false;
     }
 
+    // Get arguments
     QStringList arguments = extraArguments;
     //arguments << "-quiet";
+    arguments.append(KShell::splitArgs(config.readEntry(Config::LldbArgumentsEntry, QString())));
 
-    // TODO: Use executable, argument and environment group settings instead, and corresponding
-    // modification to config page
+    // Get environment
+    const EnvironmentGroupList egl(config.config());
+    const auto &envs = egl.variables(config.readEntry(Config::LldbEnvironmentEntry, egl.defaultGroup()));
+    QProcessEnvironment processEnv;
+    if (config.readEntry(Config::LldbInheritSystemEnvEntry, true)) {
+        processEnv = QProcessEnvironment::systemEnvironment();
+    }
+    for (auto it = envs.begin(), ite = envs.end(); it != ite; ++it) {
+        processEnv.insert(it.key(), it.value());
+    }
+
+    // Start!
+    process_->setProcessEnvironment(processEnv);
     process_->setProgram(debuggerBinary_, arguments);
     process_->start();
 

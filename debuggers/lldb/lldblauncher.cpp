@@ -77,6 +77,7 @@ QList< KDevelop::LaunchConfigurationPageFactory * > LldbLauncher::configPages() 
 
 KJob *LldbLauncher::start(const QString &launchMode, KDevelop::ILaunchConfiguration *cfg)
 {
+    qCDebug(DEBUGGERLLDB) << "LldbLauncher: starting debugging";
     if (!cfg) {
         qCWarning(DEBUGGERLLDB) << "LldbLauncher: can't start with null configuration";
         return nullptr;
@@ -95,7 +96,7 @@ KJob *LldbLauncher::start(const QString &launchMode, KDevelop::ILaunchConfigurat
         auto depJob = m_iexec->dependencyJob(cfg);
         if (depJob)
             l << depJob;
-//         l << new MIDebugJob(m_plugin, cfg, m_iexec);
+        l << new MIDebugJob(m_plugin, cfg, m_iexec);
         return new ExecuteCompositeJob(ICore::self()->runController(), l);
     }
 

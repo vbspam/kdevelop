@@ -74,6 +74,7 @@ protected:
 
 private Q_SLOTS:
     void handleFileExecAndSymbols(const MI::ResultRecord& r);
+    void handleTargetSelect(const MI::ResultRecord& r);
 
 private:
     BreakpointController *m_breakpointController;

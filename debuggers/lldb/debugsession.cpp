@@ -45,6 +45,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QProcess>
 #include <QStandardPaths>
 #include <QGuiApplication>
 
@@ -168,61 +169,36 @@ bool DebugSession::execInferior(ILaunchConfiguration *cfg, IExecutePlugin *iexec
     // config that can't be placed in configure()
     KConfigGroup grp = cfg->config();
 
-    // TODO: remote debugging for lldb, see lldb-mi file-exec-and-symbols extension
-    /*
-    QUrl runShellScript = grp.readEntry(KDevMI::remoteGdbShellEntry, QUrl());
-    QUrl runGdbScript = grp.readEntry(KDevMI::remoteGdbRunEntry, QUrl());
-    // FIXME: have a check box option that controls remote debugging
-    if (runShellScript.isValid()) {
-        // Special for remote debug, the remote inferior is started by this shell script
-        QByteArray tty(m_tty->getSlave().toLatin1());
-        QByteArray options = QByteArray(">") + tty + QByteArray("  2>&1 <") + tty;
+    QString filesymbols = doubleQuoteArg(executable);
+    bool remoteDebugging = grp.readEntry(Config::LldbRemoteDebuggingEntry, false);
+    if (remoteDebugging) {
+        auto connStr = grp.readEntry(Config::LldbRemoteServerEntry, QString());
+        auto remoteDir = grp.readEntry(Config::LldbRemotePathEntry, QString());
+        auto remoteExe = QDir(remoteDir).filePath(QFileInfo(executable).fileName());
 
-        QProcess *proc = new QProcess;
-        QStringList arguments;
-        arguments << "-c" << KShell::quoteArg(runShellScript.toLocalFile()) +
-            ' ' + KShell::quoteArg(executable) + QString::fromLatin1(options);
+        filesymbols += " -r " + doubleQuoteArg(remoteExe);
 
-        qCDebug(DEBUGGERGDB) << "starting sh" << arguments;
-        proc->start("sh", arguments);
-        //PORTING TODO QProcess::DontCare);
+        addCommand(MI::FileExecAndSymbols, filesymbols,
+                   this, &DebugSession::handleFileExecAndSymbols,
+                   CmdHandlesError);
+
+        addCommand(MI::TargetSelect, "remote " + connStr,
+                   this, &DebugSession::handleTargetSelect, CmdHandlesError);
+
+        // ensure executable is on remote end
+        addCommand(MI::NonMI, QStringLiteral("platform mkdir -v 755 %0").arg(doubleQuoteArg(remoteDir)));
+        addCommand(MI::NonMI, QStringLiteral("platform put-file %0 %1")
+                              .arg(doubleQuoteArg(executable), doubleQuoteArg(remoteExe)));
+    } else {
+        addCommand(MI::FileExecAndSymbols, filesymbols,
+                   this, &DebugSession::handleFileExecAndSymbols,
+                   CmdHandlesError);
     }
 
-    if (runGdbScript.isValid()) {
-        // Special for remote debug, gdb script at run is requested, to connect to remote inferior
-
-        // Race notice: wait for the remote gdbserver/executable
-        // - but that might be an issue for this script to handle...
-
-        // Note: script could contain "run" or "continue"
-
-        // Future: the shell script should be able to pass info (like pid)
-        // to the gdb script...
-
-        queueCmd(new SentinelCommand([this, runGdbScript]() {
-            breakpointController()->initSendBreakpoints();
-
-            breakpointController()->setDeleteDuplicateBreakpoints(true);
-            qCDebug(DEBUGGERGDB) << "Running gdb script " << KShell::quoteArg(runGdbScript.toLocalFile());
-
-            queueCmd(new MICommand(MI::NonMI, "source " + KShell::quoteArg(runGdbScript.toLocalFile()),
-                                    [this](const MI::ResultRecord&) {
-                                        breakpointController()->setDeleteDuplicateBreakpoints(false);
-                                    },
-                                    CmdMaybeStartsRunning));
-            raiseEvent(connected_to_program);
-        }, CmdMaybeStartsRunning));
-    } else {
-    */
-
-    // normal local debugging
-    addCommand(MI::FileExecAndSymbols, doubleQuoteArg(executable),
-               this, &DebugSession::handleFileExecAndSymbols,
-               CmdHandlesError);
     raiseEvent(connected_to_program);
 
-    // Set the environment variables has effect only after setting the executable
-    EnvironmentGroupList l(KSharedConfig::openConfig());
+    // Set the environment variables has effect only after target created
+    const EnvironmentGroupList l(KSharedConfig::openConfig());
     QString envgrp = iexec->environmentGroup(cfg);
     if (envgrp.isEmpty()) {
         qCWarning(DEBUGGERCOMMON) << i18n("No environment group specified, looks like a broken "
@@ -230,33 +206,36 @@ bool DebugSession::execInferior(ILaunchConfiguration *cfg, IExecutePlugin *iexec
                                           "Using default environment group.", cfg->name());
         envgrp = l.defaultGroup();
     }
-    const auto &const_l = l;
     QStringList vars;
-    for (auto it = const_l.variables(envgrp).constBegin(),
-              ite = const_l.variables(envgrp).constEnd();
+    for (auto it = l.variables(envgrp).constBegin(),
+              ite = l.variables(envgrp).constEnd();
          it != ite; ++it) {
         vars.append(QStringLiteral("%0=%1").arg(it.key(), doubleQuoteArg(it.value())));
     }
     // actually using lldb command 'settings set target.env-vars' which accepts multiple values
     addCommand(GdbSet, "environment " + vars.join(" "));
 
-    addCommand(new SentinelCommand([this]() {
+    addCommand(new SentinelCommand([this, remoteDebugging]() {
         breakpointController()->initSendBreakpoints();
-        // FIXME: a hacky way to emulate tty setting on linux. Not sure if this provides all needed
-        // functionalities of a pty. Should make this conditional on other platforms.
-        // FIXME: 'process launch' doesn't provide thread-group-started notification which MIDebugSession
-        // relies on to know the inferior has been started
-        QPointer<DebugSession> guarded_this(this);
-        addCommand(MI::NonMI,
-                   QStringLiteral("process launch --stdin %0 --stdout %0 --stderr %0").arg(m_tty->getSlave()),
-                   [guarded_this](const MI::ResultRecord &r) {
-                       qCDebug(DEBUGGERLLDB) << "process launched:" << r.reason;
-                       if (guarded_this)
-                           guarded_this->setDebuggerStateOff(s_appNotStarted | s_programExited);
-                   },
-                   CmdMaybeStartsRunning);
 
-        //addCommand(MI::ExecRun, QString(), CmdMaybeStartsRunning);
+        if (!remoteDebugging) {
+            // FIXME: a hacky way to emulate tty setting on linux. Not sure if this provides all needed
+            // functionalities of a pty. Should make this conditional on other platforms.
+            // FIXME: 'process launch' doesn't provide thread-group-started notification which MIDebugSession
+            // relies on to know the inferior has been started
+            QPointer<DebugSession> guarded_this(this);
+            addCommand(MI::NonMI,
+                       QStringLiteral("process launch --stdin %0 --stdout %0 --stderr %0").arg(m_tty->getSlave()),
+                       [guarded_this](const MI::ResultRecord &r) {
+                           qCDebug(DEBUGGERLLDB) << "process launched:" << r.reason;
+                           if (guarded_this)
+                               guarded_this->setDebuggerStateOff(s_appNotStarted | s_programExited);
+                       },
+                       CmdMaybeStartsRunning);
+        } else {
+            // what is the expected behavior for using external terminal when doing remote debugging?
+            addCommand(MI::ExecRun, QString(), CmdMaybeStartsRunning);
+        }
     }, CmdMaybeStartsRunning));
     return true;
 }
@@ -284,6 +263,17 @@ void DebugSession::handleFileExecAndSymbols(const MI::ResultRecord& r)
         KMessageBox::error(
             qApp->activeWindow(),
             i18n("<b>Could not start debugger:</b><br />")+
+            r["msg"].literal(),
+            i18n("Startup error"));
+        stopDebugger();
+    }
+}
+
+void DebugSession::handleTargetSelect(const MI::ResultRecord& r)
+{
+    if (r.reason == "error") {
+        KMessageBox::error(qApp->activeWindow(),
+            i18n("<b>Error connecting to remote target:</b><br />")+
             r["msg"].literal(),
             i18n("Startup error"));
         stopDebugger();

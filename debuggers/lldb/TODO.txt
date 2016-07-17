@@ -12,16 +12,26 @@
 - [DONE] Create minimal unit test cases to be able to test debugger and debugsession
     + [DONE] can break on start
     + [DONE] environment var successfully set
+    + Check if environment-cd works in remote debugging
     + Check if lldb supports unicode correctly
         * a program output in encoding other than utf8 and different from host system default
 
 - [DONE] Verify MIParser/MILexer can handle output without any stream prefix: no they can't
 
-- Remove duplicate breakpoint
+- Make config options in config page actually working
 
-- Remote debug
+- Clean up tool views
+    * debugger console
+    * disassembly widget
+    * register views
+        + controller
+        + tool view
+
+- Remove duplicate breakpoint: look at breakpointController()->setDeleteDuplicateBreakpoints(true)
 
 - Handle error sometime with Command 'exec-run'. Invalid process during debug session.
+
+- An unified way to report error
 
 - File bug to lldb-mi
     * HIGH PRIORITY: -break-insert
@@ -58,6 +68,20 @@
 - Change test_gdb to avoid direct use of QTest::qWait, which starts event loop, and could cause session to
   be deleted. Use WAIT_FOR_STATE_AND_IDLE(session, <previous state>) instead. Or use QPointer for session.
 
+- Known issues
+    * Remote debugging
+        + When using 'lldb-server gdbserver' as remote server, server exits once debug session ended.
+        + When using 'gdbserver' as remote server
+            - Remote work path can't contain space
+            - Can't actually start inferior
+    * Breakpoints
+        + Pending breakpoints doesn't work, which also causes break on start not function
+            - Can still manually set pending breakpoints
+        + Breakpoint hit count is not updated timely (limitation in lldb-mi)
+        + No watchpoint support
+            - Can still manually add watch point
+    * Threads
+        + lldb-mi crashes when break on a point where multiple threads running. (Fixed in latest lldb trunk version)
 
 relavent lldb settings:
 

@@ -53,6 +53,7 @@ enum DataType { typeUnknown, typeValue, typePointer, typeReference,
 // FIXME: find a more appropriate place for these strings. Possibly a place specific to debugger backend
 namespace Config {
 static const char StartWithEntry[] = "Start With";
+// FIXME: break on start isn't exposed in the UI for GDB
 static const char BreakOnStartEntry[] = "Break on Start";
 }
 
@@ -72,10 +73,11 @@ namespace LLDB { namespace Config {
 static const char LldbExecutableEntry[] = "LLDB Executable";
 static const char LldbArgumentsEntry[] = "LLDB Arguments";
 static const char LldbEnvironmentEntry[] = "LLDB Environment";
+static const char LldbInheritSystemEnvEntry[] = "LLDB Inherit System Env";
 static const char LldbConfigScriptEntry[] = "LLDB Config Script";
 static const char LldbRemoteDebuggingEntry[] = "LLDB Remote Debugging";
 static const char LldbRemoteServerEntry[] = "LLDB Remote Server";
-static const char LldbRemoteAttachEntry[] = "LLDB Remote Attach";
+static const char LldbRemotePathEntry[] = "LLDB Remote Path";
 }
 }
 

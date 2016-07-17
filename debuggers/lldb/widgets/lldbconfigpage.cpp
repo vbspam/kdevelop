@@ -31,8 +31,11 @@
 #include <KUrlRequester>
 
 #include <QComboBox>
+#include <QCheckBox>
 #include <QGroupBox>
 #include <QLineEdit>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 using namespace KDevelop;
 namespace Config = KDevMI::LLDB::Config;
@@ -44,9 +47,9 @@ LldbConfigPage::LldbConfigPage(QWidget* parent)
     ui->setupUi(this);
     ui->lineDebuggerExec->setMode(KFile::File|KFile::ExistingOnly|KFile::LocalOnly);
     ui->lineConfigScript->setMode(KFile::File|KFile::ExistingOnly|KFile::LocalOnly);
-    ui->lineRemoteServer->setMode(KFile::File|KFile::ExistingOnly|KFile::LocalOnly);
-    ui->lineAttachScript->setMode(KFile::File|KFile::ExistingOnly|KFile::LocalOnly);
 
+    QRegularExpression rx(R"([^:]+:\d+)");
+    ui->lineRemoteServer->setValidator(new QRegularExpressionValidator(rx, this));
 
     ui->comboStartWith->setItemData(0, "ApplicationOutput");
     ui->comboStartWith->setItemData(1, "GdbConsole");
@@ -62,8 +65,8 @@ LldbConfigPage::LldbConfigPage(QWidget* parent)
             this, &LldbConfigPage::changed);
 
     connect(ui->groupRemote, &QGroupBox::clicked, this, &LldbConfigPage::changed);
-    connect(ui->lineRemoteServer, &KUrlRequester::textChanged, this, &LldbConfigPage::changed);
-    connect(ui->lineAttachScript, &KUrlRequester::textChanged, this, &LldbConfigPage::changed);
+    connect(ui->lineRemoteServer, &QLineEdit::textChanged, this, &LldbConfigPage::changed);
+    connect(ui->lineOnDevPath, &QLineEdit::textChanged, this, &LldbConfigPage::changed);
 }
 
 LldbConfigPage::~LldbConfigPage()
@@ -87,12 +90,14 @@ void LldbConfigPage::loadFromConfiguration(const KConfigGroup& cfg, KDevelop::IP
     ui->lineDebuggerExec->setUrl(cfg.readEntry(Config::LldbExecutableEntry, QUrl()));
     ui->lineDebuggerArgs->setText(cfg.readEntry(Config::LldbArgumentsEntry, QString()));
     ui->comboEnv->setCurrentProfile(cfg.readEntry(Config::LldbEnvironmentEntry, QString()));
+    ui->checkInheritSystem->setChecked(cfg.readEntry(Config::LldbInheritSystemEnvEntry, true));
     ui->lineConfigScript->setUrl(cfg.readEntry(Config::LldbConfigScriptEntry, QUrl()));
+    ui->checkBreakOnStart->setChecked(cfg.readEntry(KDevMI::Config::BreakOnStartEntry, false));
     ui->comboStartWith->setCurrentIndex(ui->comboStartWith->findData(
         cfg.readEntry(KDevMI::Config::StartWithEntry, "ApplicationOutput")));
-    ui->groupRemote->setCheckable(cfg.readEntry(Config::LldbRemoteDebuggingEntry, false));
-    ui->lineRemoteServer->setUrl(cfg.readEntry(Config::LldbRemoteServerEntry, QUrl()));
-    ui->lineAttachScript->setUrl(cfg.readEntry(Config::LldbRemoteAttachEntry, QUrl()));
+    ui->groupRemote->setChecked(cfg.readEntry(Config::LldbRemoteDebuggingEntry, false));
+    ui->lineRemoteServer->setText(cfg.readEntry(Config::LldbRemoteServerEntry, QString()));
+    ui->lineOnDevPath->setText(cfg.readEntry(Config::LldbRemotePathEntry, QString()));
     blockSignals(block);
 }
 
@@ -101,11 +106,13 @@ void LldbConfigPage::saveToConfiguration(KConfigGroup cfg, KDevelop::IProject *p
     cfg.writeEntry(Config::LldbExecutableEntry, ui->lineDebuggerExec->url());
     cfg.writeEntry(Config::LldbArgumentsEntry, ui->lineDebuggerArgs->text());
     cfg.writeEntry(Config::LldbEnvironmentEntry, ui->comboEnv->currentProfile());
+    cfg.writeEntry(Config::LldbInheritSystemEnvEntry, ui->checkInheritSystem->isChecked());
     cfg.writeEntry(Config::LldbConfigScriptEntry, ui->lineConfigScript->url());
+    cfg.writeEntry(KDevMI::Config::BreakOnStartEntry, ui->checkBreakOnStart->isChecked());
     cfg.writeEntry(KDevMI::Config::StartWithEntry, ui->comboStartWith->currentData().toString());
     cfg.writeEntry(Config::LldbRemoteDebuggingEntry, ui->groupRemote->isChecked());
-    cfg.writeEntry(Config::LldbRemoteServerEntry, ui->lineRemoteServer->url());
-    cfg.writeEntry(Config::LldbRemoteAttachEntry, ui->lineAttachScript->url());
+    cfg.writeEntry(Config::LldbRemoteServerEntry, ui->lineRemoteServer->text());
+    cfg.writeEntry(Config::LldbRemotePathEntry, ui->lineOnDevPath->text());
 }
 
 KDevelop::LaunchConfigurationPage * LldbConfigPageFactory::createWidget(QWidget* parent)
