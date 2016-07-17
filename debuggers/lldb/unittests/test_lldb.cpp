@@ -1276,29 +1276,26 @@ void LldbTest::testAttach()
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 }
 
-void LldbTest::testManualAttach()
+void LldbTest::testRemoteDebugging()
 {
-    QSKIP("Skipping... No remote debug support implemented");
-    SKIP_IF_ATTACH_FORBIDDEN();
-
-    QString fileName = findSourceFile("debugeeslow.cpp");
-
-    KProcess debugeeProcess;
-    debugeeProcess << "nice" << findExecutable("lldb_debugeeslow").toLocalFile();
-    debugeeProcess.start();
-    QVERIFY(debugeeProcess.waitForStarted());
+    KProcess gdbServer;
+    gdbServer << "lldb-server" << "gdbserver" << "*:1234";
+    gdbServer.start();
+    QVERIFY(gdbServer.waitForStarted());
 
     TestDebugSession *session = new TestDebugSession;
     TestLaunchConfiguration cfg;
 
-    // Start remote debugging
-    //QVERIFY(session->startDebugging(&cfg, m_iface));
+    cfg.config().writeEntry(Config::LldbRemoteDebuggingEntry, true);
+    cfg.config().writeEntry(Config::LldbRemoteServerEntry, "localhost:1234");
+    cfg.config().writeEntry(Config::LldbRemotePathEntry, "/tmp");
 
-    session->addCommand(MI::NonMI, QString("attach %0").arg(debugeeProcess.pid()));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
+    breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(m_debugeeFileName), 34);
+
+    QVERIFY(session->startDebugging(&cfg, m_iface));
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     session->run();
-    WAIT_FOR_A_WHILE(session, 2000); // give the slow inferior some extra time to run
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 }
 

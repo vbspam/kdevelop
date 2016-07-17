@@ -40,9 +40,6 @@
               maybe should write the patch myself
         + pending breakpoints '-f' can only be last flag switch
         + create disabled breakpoint with '-d' not working when combined with '-f'
-    * HIGH PRIORITY: lldb-mi creashes when there are multiple threads when break
-        + terminate called after throwing an instance of 'std::logic_error'
-            what():  basic_string::_M_construct null not valid
     * breakpoint hit doesn't generate corresponding breakpoint-modified notification
       (needed to update hitCount)
     * -break-watch command not supported
@@ -56,13 +53,13 @@
     * -inferior-tty-set only has dummy implementation
     * 'process launch' doesn't provide thread-group-started notification
     * File bug to lldb-mi for other missing commands
+    * sliently stop when attaching to process, which confuses the controller
 
 - Data formatter for lldb
     * if this works in MI?
     * print static member?
 - Disasembly format string
     * implement asm-demangle?
-- Fix other missing commands by using cli commands
 - Fix TODOs in files
 
 - Change test_gdb to avoid direct use of QTest::qWait, which starts event loop, and could cause session to

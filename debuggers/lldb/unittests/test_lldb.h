@@ -87,7 +87,7 @@ private slots:
     void testStackSwitchThread();
 
     void testAttach();
-    void testManualAttach();
+    void testRemoteDebugging();
 
     void testCoreFile();
 
