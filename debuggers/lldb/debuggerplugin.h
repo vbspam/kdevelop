@@ -26,10 +26,19 @@
 #include "midebuggerplugin.h"
 
 #include "debugsession.h"
+#include "widgets/debuggerconsoleview.h"
 
-namespace KDevMI {
-namespace LLDB
+namespace KDevMI { namespace LLDB {
+
+class NonInterruptDebuggerConsoleView : public DebuggerConsoleView
 {
+public:
+    NonInterruptDebuggerConsoleView(MIDebuggerPlugin *plugin, QWidget *parent = nullptr)
+        : DebuggerConsoleView(plugin, parent)
+    {
+        setShowInterrupt(false);
+    }
+};
 
 class LldbDebuggerPlugin : public MIDebuggerPlugin
 {
@@ -48,6 +57,8 @@ private:
     void setupToolviews();
 
 private:
+
+    DebuggerToolFactory<DebuggerConsoleView> *m_toolView;
 };
 
 } // end of namespace LLDB

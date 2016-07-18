@@ -24,6 +24,7 @@
 
 #include "lldblauncher.h"
 #include "widgets/lldbconfigpage.h"
+#include "widgets/debuggerconsoleview.h"
 
 #include <execute/iexecuteplugin.h>
 #include <interfaces/icore.h>
@@ -57,11 +58,17 @@ LldbDebuggerPlugin::LldbDebuggerPlugin(QObject *parent, const QVariantList &)
 
 void LldbDebuggerPlugin::setupToolviews()
 {
+    m_toolView = new DebuggerToolFactory<DebuggerConsoleView>(this,
+                                                              "org.kdevelop.debugger.LldbConsole", Qt::BottomDockWidgetArea);
 
+    core()->uiController()->addToolView(
+        i18n("LLDB Console"),
+        m_toolView);
 }
 
 void LldbDebuggerPlugin::unload()
 {
+    core()->uiController()->removeToolView(m_toolView);
     /*
     core()->uiController()->removeToolView(disassemblefactory);
     core()->uiController()->removeToolView(lldbfactory);
