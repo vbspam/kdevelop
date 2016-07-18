@@ -1,5 +1,8 @@
 /*
  * Debugger Console View
+ *
+ * Copyright 2003 John Birch <jbb@kdevelop.org>
+ * Copyright 2007 Hamish Rodda <rodda@kde.org>
  * Copyright 2016  Aetf <aetf@unlimitedcodeworks.xyz>
  *
  * This program is free software; you can redistribute it and/or

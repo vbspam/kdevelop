@@ -21,11 +21,10 @@
 - Make config options in config page actually working
 
 - Clean up tool views
-    * debugger console
-    * disassembly widget
     * register views
         + controller
         + tool view
+    * disassembly widget
 
 - Remove duplicate breakpoint: look at breakpointController()->setDeleteDuplicateBreakpoints(true)
 
