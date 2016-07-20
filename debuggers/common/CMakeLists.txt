@@ -20,6 +20,15 @@ set(debuggercommon_SRCS
     stty.cpp
     # tool views
     widgets/debuggerconsoleview.cpp
+    widgets/disassemblewidget.cpp
+    # register
+    registers/registersview.cpp
+    registers/registercontroller.cpp
+    registers/registersmanager.cpp
+    registers/registercontroller_x86.cpp
+    registers/registercontroller_arm.cpp
+    registers/modelsmanager.cpp
+    registers/converters.cpp
 )
 if(KF5SysGuard_FOUND)
     list(APPEND debuggercommon_SRCS
@@ -30,6 +39,8 @@ endif()
 ki18n_wrap_ui(debuggercommon_SRCS
     dialogs/selectcoredialog.ui
     widgets/debuggerconsoleview.ui
+    widgets/selectaddressdialog.ui
+    registers/registersview.ui
 )
 
 # Use old behavior (ignore the visibility properties for static libraries, object
