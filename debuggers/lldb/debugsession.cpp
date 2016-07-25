@@ -119,6 +119,10 @@ void DebugSession::initializeDebugger()
     }
     */
 
+    // set a larger term width.
+    // TODO: set term-width to exact max column count in console view
+    addCommand(MI::NonMI, "settings set term-width 1024");
+
     qCDebug(DEBUGGERLLDB) << "Initialized LLDB";
 }
 

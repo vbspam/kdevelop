@@ -38,8 +38,8 @@
 #include <KLocalizedString>
 
 #include <QAction>
-#include <QApplication>
 #include <QClipboard>
+#include <QEvent>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
@@ -109,16 +109,14 @@ DebuggerConsoleView::DebuggerConsoleView(MIDebuggerPlugin *plugin, QWidget *pare
 
     handleSessionChanged(plugin->core()->debugController()->currentSession());
 
-    // tap to QApplication object for color palette changes
-    //QCoreApplication::instance()->installEventFilter(this);
+    updateColors();
 }
 
-bool DebuggerConsoleView::eventFilter(QObject *, QEvent *event)
+void DebuggerConsoleView::changeEvent(QEvent *event)
 {
-    if (event->type() == QEvent::ApplicationPaletteChange) {
+    if (event->type() == QEvent::PaletteChange) {
         updateColors();
     }
-    return false;
 }
 
 void DebuggerConsoleView::updateColors()
@@ -247,12 +245,6 @@ void DebuggerConsoleView::flushPending()
 {
     m_textView->setUpdatesEnabled(false);
 
-    // QTextEdit adds newline after paragraph automatically.
-    // So, remove trailing newline to avoid double newlines.
-    if (m_pendingOutput.endsWith('\n'))
-        m_pendingOutput.remove(m_pendingOutput.length()-1, 1);
-    Q_ASSERT(!m_pendingOutput.endsWith('\n'));
-
     QTextDocument *document = m_textView->document();
     QTextCursor cursor(document);
     cursor.movePosition(QTextCursor::End);
@@ -299,18 +291,18 @@ void DebuggerConsoleView::handleDebuggerStateChange(DBGStateFlags, DBGStateFlags
     }
 }
 
+QString DebuggerConsoleView::toHtmlEscaped(QString text)
+{
+    text = text.toHtmlEscaped();
+
+    text.replace('\n', "<br>");
+    return text;
+}
+
+
 QString DebuggerConsoleView::colorify(QString text, const QColor& color)
 {
-    // Make sure the newline is at the end of the newly-added
-    // string. This is so that we can always correctly remove
-    // newline inside 'flushPending'.
-    if (!text.endsWith('\n'))
-        text.append('\n');
-
-    if (text.endsWith('\n')) {
-        text.remove(text.length()-1, 1);
-    }
-    text = "<font color=\"" + color.name() +  "\">" + text + "</font><br>";
+    text = "<font color=\"" + color.name() +  "\">" + text + "</font>";
     return text;
 }
 
@@ -326,11 +318,9 @@ void DebuggerConsoleView::receivedUserCommandStdout(const QString& line)
 
 void DebuggerConsoleView::receivedStdout(const QString& line, bool internal)
 {
-    QString colored = line.toHtmlEscaped();
+    QString colored = toHtmlEscaped(line);
     if (colored.startsWith("(gdb)")) {
         colored = colorify(colored, m_stdColor);
-    } else {
-        colored.replace('\n', "<br>");
     }
 
     m_allOutput.append(colored);
@@ -347,7 +337,8 @@ void DebuggerConsoleView::receivedStdout(const QString& line, bool internal)
 
 void DebuggerConsoleView::receivedStderr(const QString& line)
 {
-    QString colored = colorify(line.toHtmlEscaped(), m_errorColor);
+    QString colored = toHtmlEscaped(line);
+    colored = colorify(colored, m_errorColor);
 
     // Errors are shown inside user commands too.
     m_allOutput.append(colored);

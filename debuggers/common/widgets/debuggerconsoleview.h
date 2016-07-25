@@ -82,6 +82,12 @@ protected:
      */
     void appendLine(const QString &line);
     void updateColors();
+
+    /**
+     * escape html meta characters and handle line break
+     */
+    QString toHtmlEscaped(QString text);
+
     QString colorify(QString text, const QColor &color);
 
     /**
@@ -90,7 +96,7 @@ protected:
      */
     void trimList(QStringList& l, int max_size);
 
-    bool eventFilter(QObject *, QEvent *) override;
+    void changeEvent(QEvent *e) override;
     void focusInEvent(QFocusEvent *e) override;
 
 protected Q_SLOTS:
