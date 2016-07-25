@@ -169,9 +169,13 @@ QString LldbCommand::cmdToSend()
         // -gdb-set is only partially implemented
         case GdbSet: {
             QString env_name = "environment ";
+            QString disassembly_flavor = "disassembly-flavor ";
             if (command_.startsWith(env_name)) {
                 command_ = command_.mid(env_name.length());
                 overrideCmd = "settings set target.env-vars";
+            } else if (command_.startsWith(disassembly_flavor)) {
+                command_ = command_.mid(disassembly_flavor.length());
+                overrideCmd = "settings set target.x86-disassembly-flavor";
             }
             break;
         }

@@ -40,6 +40,8 @@ K_PLUGIN_FACTORY_WITH_JSON(LldbDebuggerFactory, "kdevlldb.json", registerPlugin<
 
 LldbDebuggerPlugin::LldbDebuggerPlugin(QObject *parent, const QVariantList &)
     : MIDebuggerPlugin("kdevlldb", parent)
+    , m_consoleFactory(nullptr)
+    , m_disassembleFactory(nullptr)
 {
     setXMLFile("kdevlldbui.rc");
 
@@ -58,20 +60,21 @@ LldbDebuggerPlugin::LldbDebuggerPlugin(QObject *parent, const QVariantList &)
 
 void LldbDebuggerPlugin::setupToolviews()
 {
-    m_toolView = new DebuggerToolFactory<DebuggerConsoleView>(this,
-                                                              "org.kdevelop.debugger.LldbConsole", Qt::BottomDockWidgetArea);
-
-    core()->uiController()->addToolView(
-        i18n("LLDB Console"),
-        m_toolView);
+    m_consoleFactory = new DebuggerToolFactory<DebuggerConsoleView>(this,
+                            "org.kdevelop.debugger.LldbConsole", Qt::BottomDockWidgetArea);
+    core()->uiController()->addToolView(i18n("LLDB Console"), m_consoleFactory);
+    /*
+    m_disassembleFactory = new DebuggerToolFactory<DisassembleWidget>(this,
+                            "org.kdevelop.debugger.LldbDisassemble", Qt::BottomDockWidgetArea);
+    core()->uiController()->addToolView(i18n("LLDB Disassemble/Register"), m_disassembleFactory);
+    */
 }
 
 void LldbDebuggerPlugin::unload()
 {
-    core()->uiController()->removeToolView(m_toolView);
+    core()->uiController()->removeToolView(m_consoleFactory);
     /*
-    core()->uiController()->removeToolView(disassemblefactory);
-    core()->uiController()->removeToolView(lldbfactory);
+    core()->uiController()->removeToolView(m_disassembleFactory);
     core()->uiController()->removeToolView(memoryviewerfactory);
     */
 }

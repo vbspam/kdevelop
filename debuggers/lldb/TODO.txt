@@ -25,6 +25,9 @@
         + controller
         + tool view
     * disassembly widget
+    * memory view
+
+- Tool views won't showup when start debug session
 
 - Remove duplicate breakpoint: look at breakpointController()->setDeleteDuplicateBreakpoints(true)
 
@@ -51,8 +54,13 @@
     * can't have space in environment cd
     * -inferior-tty-set only has dummy implementation
     * 'process launch' doesn't provide thread-group-started notification
-    * File bug to lldb-mi for other missing commands
     * sliently stop when attaching to process, which confuses the controller
+    * sliently stop when request stop at start
+    * -data-disassemble start and end address parameter doesn't accept expressions
+    * -gdb-set not fully implemented
+        + environment
+        + disassembly-flavor
+    * File bug to lldb-mi for other missing commands
 
 - Data formatter for lldb
     * if this works in MI?

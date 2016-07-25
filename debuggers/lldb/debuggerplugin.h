@@ -27,6 +27,7 @@
 
 #include "debugsession.h"
 #include "widgets/debuggerconsoleview.h"
+#include "widgets/disassemblewidget.h"
 
 namespace KDevMI { namespace LLDB {
 
@@ -58,7 +59,8 @@ private:
 
 private:
 
-    DebuggerToolFactory<DebuggerConsoleView> *m_toolView;
+    DebuggerToolFactory<DebuggerConsoleView> *m_consoleFactory;
+    DebuggerToolFactory<DisassembleWidget> *m_disassembleFactory;
 };
 
 } // end of namespace LLDB
