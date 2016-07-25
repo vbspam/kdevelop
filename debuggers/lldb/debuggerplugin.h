@@ -59,7 +59,7 @@ private:
 
 private:
 
-    DebuggerToolFactory<DebuggerConsoleView> *m_consoleFactory;
+    DebuggerToolFactory<NonInterruptDebuggerConsoleView> *m_consoleFactory;
     DebuggerToolFactory<DisassembleWidget> *m_disassembleFactory;
 };
 

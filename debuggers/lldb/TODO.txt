@@ -73,6 +73,8 @@
   be deleted. Use WAIT_FOR_STATE_AND_IDLE(session, <previous state>) instead. Or use QPointer for session.
 
 - Known issues
+    * Debugger console
+        + debugger CLI stdout isn't shown, due to bug https://llvm.org/bugs/show_bug.cgi?id=28026
     * Remote debugging
         + When using 'lldb-server gdbserver' as remote server, server exits once debug session ended.
         + When using 'gdbserver' as remote server

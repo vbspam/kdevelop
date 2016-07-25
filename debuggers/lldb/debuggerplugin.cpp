@@ -60,7 +60,7 @@ LldbDebuggerPlugin::LldbDebuggerPlugin(QObject *parent, const QVariantList &)
 
 void LldbDebuggerPlugin::setupToolviews()
 {
-    m_consoleFactory = new DebuggerToolFactory<DebuggerConsoleView>(this,
+    m_consoleFactory = new DebuggerToolFactory<NonInterruptDebuggerConsoleView>(this,
                             "org.kdevelop.debugger.LldbConsole", Qt::BottomDockWidgetArea);
     core()->uiController()->addToolView(i18n("LLDB Console"), m_consoleFactory);
     /*
