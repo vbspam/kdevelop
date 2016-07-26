@@ -194,6 +194,7 @@ public:
     TestDebugSession() : DebugSession()
     {
         setSourceInitFile(false);
+        setAutoDisableASLR(false);
         m_frameStackModel = new TestFrameStackModel(this);
         KDevelop::ICore::self()->debugController()->addSession(this);
     }

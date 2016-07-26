@@ -35,7 +35,6 @@ public:
     ~GdbDebugger() override;
 
     bool start(KConfigGroup& config, const QStringList& extraArguments = {}) override;
-
 };
 
 } // end of namespace GDB
