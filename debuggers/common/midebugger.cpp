@@ -174,7 +174,13 @@ void MIDebugger::processLine(const QByteArray& line)
         case MI::Record::Result: {
             MI::ResultRecord& result = static_cast<MI::ResultRecord&>(*r);
 
-            emit internalCommandOutput(QString::fromUtf8(line) + '\n');
+            // it's still possible for the user to issue a MI command,
+            // emit correct signal
+            if (currentCmd_ && currentCmd_->isUserCommand()) {
+                emit userCommandOutput(QString::fromUtf8(line) + '\n');
+            } else {
+                emit internalCommandOutput(QString::fromUtf8(line) + '\n');
+            }
 
             // GDB doc: "running" and "exit" are status codes equivalent to "done"
             if (result.reason == "done" || result.reason == "running" || result.reason == "exit")
