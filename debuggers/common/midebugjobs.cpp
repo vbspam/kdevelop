@@ -114,12 +114,10 @@ void MIDebugJob::start()
 
     KConfigGroup grp = m_launchcfg->config();
     QString startWith = grp.readEntry(Config::StartWithEntry, QString("ApplicationOutput"));
-    if (startWith == "GdbConsole") {
-        setVerbosity(Silent);
-    } else if (startWith == "FrameStack") {
-        setVerbosity(Silent);
-    } else {
+    if (startWith == "ApplicationOutput") {
         setVerbosity(Verbose);
+    } else {
+        setVerbosity(Silent);
     }
 
     startOutput();

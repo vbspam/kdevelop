@@ -1,9 +1,6 @@
 - [DONE] Correct signal handling commands for lldb
 - [DONE] Correct environment variable setting commands for lldb
 
-- [DONE] File bug to lldb-mi that interpreter-exec not properly prefix console output by '~'
-    + In MICmdCmdMiscellanous.cpp:CMICmdCmdInterpreterExec::Acknowledge()
-
 - [DONE] Port DebugJob
 - [DONE] Port exam core and attach process to KJob
 - [DONE] Move DebuggerPlugin to MIDebuggerPlugin
@@ -18,7 +15,7 @@
 
 - [DONE] Verify MIParser/MILexer can handle output without any stream prefix: no they can't
 
-- Make config options in config page actually working
+- [DONE] Make config options in config page actually working
 
 - Clean up tool views
     * register views
@@ -27,9 +24,13 @@
     * disassembly widget
     * memory view
 
-- Tool views won't showup when start debug session
+- Find a way to avoid duplicate tool views for GDB and LLDB plugin
 
 - Remove duplicate breakpoint: look at breakpointController()->setDeleteDuplicateBreakpoints(true)
+
+- Polish debugger console
+    * [DONE] user command output regarded as internal command
+    * [DONE] not correctly raised when starting debug
 
 - Handle error sometime with Command 'exec-run'. Invalid process during debug session.
 
@@ -38,9 +39,9 @@
 - File bug to lldb-mi
     * HIGH PRIORITY: -break-insert
         + [SUBMITED] pending breakpoints set with '-f' not got resolved after file loaded
-            - fix is simple from lldb-mi side but quite difficult from kdevelop side.
-              maybe should write the patch myself
+            - https://llvm.org/bugs/show_bug.cgi?id=28702
         + [SUBMITED] pending breakpoints '-f' can only be last flag switch
+            - https://llvm.org/bugs/show_bug.cgi?id=28698
         + [SUBMITED] create disabled breakpoint with '-d' not working when combined with '-f'
             - https://llvm.org/bugs/show_bug.cgi?id=28703
         + -break-enable has no effect
@@ -57,14 +58,19 @@
     * -inferior-tty-set only has dummy implementation
     * 'process launch' doesn't provide thread-group-started notification
     * sliently stop when attaching to process, which confuses the controller
-    * sliently stop when request stop at start
+    * [SUBMITED] sliently stop when request stop at start
+        - https://llvm.org/bugs/show_bug.cgi?id=25000
     * [SUBMITED] [PATCHED] cli output not wrapped in console stream record
     * [PATCHED] -data-disassemble start and end address parameter doesn't accept expressions
     * -gdb-set not fully implemented
         + environment
-        + [PATCHED] disassembly-flavor
+        + [SUBMITED] [PATCHED] disassembly-flavor
+            - https://llvm.org/bugs/show_bug.cgi?id=28718
     * -gdb-show not fully implemented
-        + [PATCHED] disassembly-flavor
+        + [SUBMITED] [PATCHED] disassembly-flavor
+            - https://llvm.org/bugs/show_bug.cgi?id=28718
+    * [SUBMITED] -stack-list-locals shows empty list
+        - https://llvm.org/bugs/show_bug.cgi?id=28621
     * File bug to lldb-mi for other missing commands
 
 - Data formatter for lldb
