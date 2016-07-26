@@ -45,6 +45,9 @@ public:
     // For testing
     using KDevelop::Variable::childCount;
     using KDevelop::Variable::child;
+
+protected:
+    void formatChanged() override;
 };
 
 } // end of namespace LLDB

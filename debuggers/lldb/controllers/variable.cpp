@@ -45,3 +45,31 @@ void LldbVariable::handleRawUpdate(const ResultRecord& r)
     if (changelist.size() == 1)
         handleUpdate(changelist[0]);
 }
+
+void LldbVariable::formatChanged()
+{
+    if(childCount())
+    {
+        foreach(TreeItem* item, childItems) {
+            Q_ASSERT(dynamic_cast<MIVariable*>(item));
+            if( MIVariable* var=dynamic_cast<MIVariable*>(item))
+                var->setFormat(format());
+        }
+    }
+    else
+    {
+        if (sessionIsAlive()) {
+            QPointer<LldbVariable> guarded_this(this);
+            debugSession->addCommand(
+                VarSetFormat,
+                QString(" %1 %2 ").arg(varobj_).arg(format2str(format())),
+                [guarded_this](const ResultRecord &r){
+                    if(guarded_this && r.hasField("changelist")) {
+                        if (r["changelist"].size() > 0) {
+                            guarded_this->handleRawUpdate(r);
+                        }
+                    }
+                });
+        }
+    }
+}

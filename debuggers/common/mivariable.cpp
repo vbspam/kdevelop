@@ -355,7 +355,7 @@ void MIVariable::formatChanged()
     {
         if (sessionIsAlive()) {
             debugSession->addCommand(VarSetFormat,
-                                     QString(" \"%1\" %2 ").arg(varobj_).arg(format2str(format())),
+                                     QString(" %1 %2 ").arg(varobj_).arg(format2str(format())),
                                      new SetFormatHandler(this));
         }
     }
