@@ -84,7 +84,7 @@ QString LldbConfigPage::title() const
     return i18n("LLDB Configuration");
 }
 
-void LldbConfigPage::loadFromConfiguration(const KConfigGroup& cfg, KDevelop::IProject *proj)
+void LldbConfigPage::loadFromConfiguration(const KConfigGroup& cfg, KDevelop::IProject *)
 {
     bool block = blockSignals(true);
     ui->lineDebuggerExec->setUrl(cfg.readEntry(Config::LldbExecutableEntry, QUrl()));
@@ -101,7 +101,7 @@ void LldbConfigPage::loadFromConfiguration(const KConfigGroup& cfg, KDevelop::IP
     blockSignals(block);
 }
 
-void LldbConfigPage::saveToConfiguration(KConfigGroup cfg, KDevelop::IProject *proj) const
+void LldbConfigPage::saveToConfiguration(KConfigGroup cfg, KDevelop::IProject *) const
 {
     cfg.writeEntry(Config::LldbExecutableEntry, ui->lineDebuggerExec->url());
     cfg.writeEntry(Config::LldbArgumentsEntry, ui->lineDebuggerArgs->text());
