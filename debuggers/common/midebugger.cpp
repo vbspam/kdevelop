@@ -311,7 +311,7 @@ void MIDebugger::processLine(const QByteArray& line)
 
 void MIDebugger::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    qCDebug(DEBUGGERGDB) << "Debugger FINISHED\n";
+    qCDebug(DEBUGGERCOMMON) << "Debugger FINISHED\n";
 
     bool abnormal = exitCode != 0 || exitStatus != QProcess::NormalExit;
     emit userCommandOutput("Process exited\n");
@@ -320,7 +320,7 @@ void MIDebugger::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
 void MIDebugger::processErrored(QProcess::ProcessError error)
 {
-    qCDebug(DEBUGGERGDB) << "Debugger ERRORED" << error;
+    qCDebug(DEBUGGERCOMMON) << "Debugger ERRORED" << error;
     if(error == QProcess::FailedToStart)
     {
         KMessageBox::information(
