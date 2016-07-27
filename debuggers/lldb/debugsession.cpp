@@ -24,6 +24,7 @@
 
 #include "controllers/variable.h"
 #include "dbgglobal.h"
+#include "debuggerplugin.h"
 #include "debuglog.h"
 #include "lldbcommand.h"
 #include "mi/micommand.h"
@@ -59,8 +60,8 @@ QString doubleQuoteArg(QString arg)
     return '"' + arg + '"';
 }
 
-DebugSession::DebugSession()
-    : MIDebugSession()
+DebugSession::DebugSession(LldbDebuggerPlugin *plugin)
+    : MIDebugSession(plugin)
     , m_breakpointController(nullptr)
     , m_variableController(nullptr)
     , m_frameStackModel(nullptr)
@@ -68,10 +69,13 @@ DebugSession::DebugSession()
     m_breakpointController = new BreakpointController(this);
     m_variableController = new VariableController(this);
     m_frameStackModel = new LldbFrameStackModel(this);
+
+    if (m_plugin) m_plugin->setupToolviews();
 }
 
 DebugSession::~DebugSession()
 {
+    if (m_plugin) m_plugin->unloadToolviews();
 }
 
 BreakpointController *DebugSession::breakpointController() const

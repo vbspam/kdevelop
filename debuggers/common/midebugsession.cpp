@@ -63,7 +63,7 @@ using namespace KDevelop;
 using namespace KDevMI;
 using namespace KDevMI::MI;
 
-MIDebugSession::MIDebugSession()
+MIDebugSession::MIDebugSession(MIDebuggerPlugin *plugin)
     : m_procLineMaker(new ProcessLineMaker(this))
     , m_commandQueue(new CommandQueue)
     , m_sessionState(NotStartedState)
@@ -74,6 +74,7 @@ MIDebugSession::MIDebugSession()
     , m_tty(nullptr)
     , m_hasCrashed(false)
     , m_sourceInitFile(true)
+    , m_plugin(plugin)
 {
     // setup signals
     connect(m_procLineMaker, &ProcessLineMaker::receivedStdoutLines,

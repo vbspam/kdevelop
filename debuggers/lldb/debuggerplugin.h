@@ -51,14 +51,11 @@ public:
     LldbDebuggerPlugin(QObject *parent, const QVariantList & = QVariantList());
     ~LldbDebuggerPlugin() override;
 
-    DebugSession *createSession() const override;
-    void unload() override;
+    DebugSession *createSession() override;
+    void unloadToolviews() override;
+    void setupToolviews() override;
 
 private:
-    void setupToolviews();
-
-private:
-
     DebuggerToolFactory<NonInterruptDebuggerConsoleView> *m_consoleFactory;
     DebuggerToolFactory<DisassembleWidget> *m_disassembleFactory;
 };

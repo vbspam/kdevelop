@@ -61,11 +61,12 @@ class CommandQueue;
 
 namespace GDB {
 
+class CppDebuggerPlugin;
 class DebugSession : public MIDebugSession
 {
     Q_OBJECT
 public:
-    DebugSession();
+    explicit DebugSession(CppDebuggerPlugin *plugin = nullptr);
     ~DebugSession() override;
 
     BreakpointController * breakpointController() const override;

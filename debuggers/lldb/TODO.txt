@@ -24,7 +24,7 @@
     * disassembly widget
     * memory view
 
-- Find a way to avoid duplicate tool views for GDB and LLDB plugin
+- [DONE] Find a way to avoid duplicate tool views for GDB and LLDB plugin
 
 - Remove duplicate breakpoint: look at breakpointController()->setDeleteDuplicateBreakpoints(true)
 
@@ -52,7 +52,8 @@
     * when hit watch point, nothing is output, which confuses the controller
     * thread-info returns malformated result
         + there should be only one 'frame' key for each thread in the list
-        + [FIXED] there shoule be a current-thread-id field (fixed at least in revision 265858)
+        + [FIXED] there shoule be a current-thread-id field (Fixed at least in revision 265858)
+    * [FIXED] lldb-mi crashes when break on a point where multiple threads running. (Fixed at least in revision 265858)
     * var-update doesn't support * as variable name
     * can't have space in environment cd
     * -inferior-tty-set only has dummy implementation

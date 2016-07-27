@@ -58,7 +58,14 @@ public:
     void unload() override;
     KDevelop::ContextMenuExtension contextMenuExtension( KDevelop::Context* ) override;
 
-    virtual MIDebugSession *createSession() const = 0;
+    virtual MIDebugSession *createSession() = 0;
+
+    virtual void setupToolviews() = 0;
+    /**
+     * The implementation should be sure it's safe to call
+     * even when tool views are already unloaded.
+     */
+    virtual void unloadToolviews() = 0;
 
 //BEGIN IStatus
 public:
@@ -97,7 +104,6 @@ protected Q_SLOTS:
     void slotCloseDrKonqi();
 
 protected:
-    void setupToolviews();
     void setupActions();
     void setupDBus();
 

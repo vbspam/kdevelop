@@ -52,13 +52,14 @@ class CommandQueue;
 }
 
 class MIDebugger;
+class MIDebuggerPlugin;
 class MIVariable;
 class STTY;
 class MIDebugSession : public KDevelop::IDebugSession
 {
     Q_OBJECT
 public:
-    MIDebugSession();
+    explicit MIDebugSession(MIDebuggerPlugin *plugin = nullptr);
     ~MIDebugSession() override;
 
 Q_SIGNALS:
@@ -344,6 +345,8 @@ protected:
 
     // Map from GDB varobj name to MIVariable.
     QMap<QString, MIVariable*> m_allVariables;
+
+    MIDebuggerPlugin *m_plugin;
 };
 
 template<class Handler>

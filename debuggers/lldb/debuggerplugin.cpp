@@ -22,6 +22,7 @@
 
 #include "debuggerplugin.h"
 
+#include "debuglog.h"
 #include "lldblauncher.h"
 #include "widgets/lldbconfigpage.h"
 #include "widgets/debuggerconsoleview.h"
@@ -44,8 +45,6 @@ LldbDebuggerPlugin::LldbDebuggerPlugin(QObject *parent, const QVariantList &)
     , m_disassembleFactory(nullptr)
 {
     setXMLFile("kdevlldbui.rc");
-
-    setupToolviews();
 
     auto plugins = core()->pluginController()->allPluginsForExtension("org.kdevelop.IExecutePlugin");
     for (auto plugin : plugins) {
@@ -70,9 +69,13 @@ void LldbDebuggerPlugin::setupToolviews()
     */
 }
 
-void LldbDebuggerPlugin::unload()
+void LldbDebuggerPlugin::unloadToolviews()
 {
-    core()->uiController()->removeToolView(m_consoleFactory);
+    if (m_consoleFactory) {
+        qCDebug(DEBUGGERLLDB) << "Removing toolview";
+        core()->uiController()->removeToolView(m_consoleFactory);
+        m_consoleFactory = nullptr;
+    }
     /*
     core()->uiController()->removeToolView(m_disassembleFactory);
     core()->uiController()->removeToolView(memoryviewerfactory);
@@ -83,9 +86,9 @@ LldbDebuggerPlugin::~LldbDebuggerPlugin()
 {
 }
 
-DebugSession* LldbDebuggerPlugin::createSession() const
+DebugSession* LldbDebuggerPlugin::createSession()
 {
-    DebugSession *session = new DebugSession();
+    DebugSession *session = new DebugSession(this);
     core()->debugController()->addSession(session);
     connect(session, &DebugSession::showMessage, this, &LldbDebuggerPlugin::showStatusMessage);
     connect(session, &DebugSession::reset, this, &LldbDebuggerPlugin::reset);

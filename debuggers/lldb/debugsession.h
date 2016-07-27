@@ -25,11 +25,10 @@
 
 #include "midebugsession.h"
 
-#include "lldbdebugger.h"
 #include "controllers/breakpointcontroller.h"
 #include "controllers/framestackmodel.h"
 #include "controllers/variablecontroller.h"
-
+#include "lldbdebugger.h"
 
 namespace KDevelop {
 class ILaunchConfiguration;
@@ -43,11 +42,12 @@ struct ResultRecord;
 
 namespace LLDB {
 
+class LldbDebuggerPlugin;
 class DebugSession : public MIDebugSession
 {
     Q_OBJECT
 public:
-    DebugSession();
+    explicit DebugSession(LldbDebuggerPlugin *plugin = nullptr);
     ~DebugSession() override;
 
     BreakpointController * breakpointController() const override;
@@ -71,6 +71,9 @@ protected:
     void configure(KDevelop::ILaunchConfiguration *cfg, IExecutePlugin *iexec);
 
     void ensureDebuggerListening() override;
+
+    void setupToolviews();
+    void unloadToolviews();
 
 private Q_SLOTS:
     void handleFileExecAndSymbols(const MI::ResultRecord& r);
