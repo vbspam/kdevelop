@@ -326,14 +326,17 @@ void GdbTest::testEnvironmentSet()
     QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, KDevelop::IDebugSession::EndedState);
 
-    QCOMPARE(outputSpy.count(), 2);
-    QList<QVariant> arguments = outputSpy.takeFirst();
-    QCOMPARE(arguments.count(), 1);
-    QCOMPARE(arguments.first().toStringList(), QStringList() << "-A' \" complex --value");
+    QVERIFY(outputSpy.count() > 0);
 
-    arguments = outputSpy.takeFirst();
-    QCOMPARE(arguments.count(), 1);
-    QCOMPARE(arguments.first().toStringList(), QStringList() << "-B' \" complex --value");
+    QStringList outputLines;
+    while (outputSpy.count() > 0) {
+        QList<QVariant> arguments = outputSpy.takeFirst();
+        for (const auto &item : arguments) {
+            outputLines.append(item.toStringList());
+        }
+    }
+    QCOMPARE(outputLines, QStringList() << "-A' \" complex --value"
+                                       << "-B' \" complex --value");
 }
 
 void GdbTest::testBreakpoint()
@@ -1817,26 +1820,31 @@ void GdbTest::testCatchpoint()
     WAIT_FOR_STATE(session, DebugSession::EndedState);
 }
 
-//TODO: figure out why do we need this test? And do we need it at all??
 void GdbTest::testThreadAndFrameInfo()
 {
+    // Check if --thread is added to user commands
+
     TestDebugSession *session = new TestDebugSession;
     TestLaunchConfiguration cfg(findExecutable("debugeethreads"));
     QString fileName = findSourceFile("debugeethreads.cpp");
 
     breakpoints()->addCodeBreakpoint(QUrl::fromLocalFile(fileName), 38);
     QVERIFY(session->startDebugging(&cfg, m_iface));
-    WAIT_FOR_STATE(session, DebugSession::PausedState);
-    QTest::qWait(1000);
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState);
 
     QSignalSpy outputSpy(session, &TestDebugSession::debuggerUserCommandOutput);
 
-    session->addCommand(
-                new MI::UserCommand(MI::ThreadInfo,""));
+    session->addCommand(new MI::UserCommand(MI::ThreadInfo,""));
     session->addCommand(new MI::UserCommand(MI::StackListLocals, QLatin1String("0")));
-    QTest::qWait(1000);
-    QCOMPARE(outputSpy.count(), 2);
-    QVERIFY(outputSpy.last().at(0).toString().contains(QLatin1String("--thread 1")));
+    WAIT_FOR_STATE_AND_IDLE(session, DebugSession::PausedState); // wait for command finish
+
+    // outputs should be
+    // 1. -thread-info
+    // 2. ^done for thread-info
+    // 3. -stack-list-locals
+    // 4. ^done for -stack-list-locals
+    QCOMPARE(outputSpy.count(), 4);
+    QVERIFY(outputSpy.at(2).at(0).toString().contains(QLatin1String("--thread 1")));
 
     session->run();
     WAIT_FOR_STATE(session, DebugSession::EndedState);

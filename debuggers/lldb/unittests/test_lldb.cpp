@@ -240,14 +240,17 @@ void LldbTest::testStdout()
     QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, KDevelop::IDebugSession::EndedState);
 
-    QCOMPARE(outputSpy.count(), 2);
-    QList<QVariant> arguments = outputSpy.takeFirst();
-    QCOMPARE(arguments.count(), 1);
-    QCOMPARE(arguments.first().toStringList(), QStringList() << "Hello, world!");
+    QVERIFY(outputSpy.count() > 0);
 
-    arguments = outputSpy.takeFirst();
-    QCOMPARE(arguments.count(), 1);
-    QCOMPARE(arguments.first().toStringList(), QStringList() << "Hello");
+    QStringList outputLines;
+    while (outputSpy.count() > 0) {
+        QList<QVariant> arguments = outputSpy.takeFirst();
+        for (const auto &item : arguments) {
+            outputLines.append(item.toStringList());
+        }
+    }
+    QCOMPARE(outputLines, QStringList() << "Hello, world!"
+                                        << "Hello");
 }
 
 void LldbTest::testEnvironmentSet()
@@ -269,14 +272,17 @@ void LldbTest::testEnvironmentSet()
     QVERIFY(session->startDebugging(&cfg, m_iface));
     WAIT_FOR_STATE(session, KDevelop::IDebugSession::EndedState);
 
-    QCOMPARE(outputSpy.count(), 2);
-    QList<QVariant> arguments = outputSpy.takeFirst();
-    QCOMPARE(arguments.count(), 1);
-    QCOMPARE(arguments.first().toStringList(), QStringList() << "-A' \" complex --value");
+    QVERIFY(outputSpy.count() > 0);
 
-    arguments = outputSpy.takeFirst();
-    QCOMPARE(arguments.count(), 1);
-    QCOMPARE(arguments.first().toStringList(), QStringList() << "-B' \" complex --value");
+    QStringList outputLines;
+    while (outputSpy.count() > 0) {
+        QList<QVariant> arguments = outputSpy.takeFirst();
+        for (const auto &item : arguments) {
+            outputLines.append(item.toStringList());
+        }
+    }
+    QCOMPARE(outputLines, QStringList() << "-A' \" complex --value"
+                                        << "-B' \" complex --value");
 }
 
 void LldbTest::testBreakpoint()
