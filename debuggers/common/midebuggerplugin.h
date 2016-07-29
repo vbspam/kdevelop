@@ -145,16 +145,6 @@ public:
             QObject::connect(view->widget(), SIGNAL(requestRaise()), view, SLOT(requestRaise()));
     }
 
-    /* At present, some debugger widgets (e.g. breakpoint) contain actions so that shortcuts
-        work, but they don't need any toolbar.  So, suppress toolbar action.  */
-    /*
-    QList<QAction*> toolBarActions(QWidget* viewWidget) const override
-    {
-        Q_UNUSED(viewWidget);
-        return QList<QAction*>();
-    }
-    */
-
 private:
     Plugin * m_plugin;
     QString m_id;
