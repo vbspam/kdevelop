@@ -12,10 +12,26 @@
     + Check if environment-cd works in remote debugging
     + Check if lldb supports unicode correctly
         * a program output in encoding other than utf8 and different from host system default
+    + Make examine core test working with coredumpctl
 
 - [DONE] Verify MIParser/MILexer can handle output without any stream prefix: no they can't
 
 - [DONE] Make config options in config page actually working
+
+- Clean up extra actions provided by gdb/lldb plugins
+    - Add lldb actions for attach to process and examine core file
+
+- Remove duplicate breakpoint: look at breakpointController()->setDeleteDuplicateBreakpoints(true)
+
+- LLDB data formatter for Qt types
+- Data formatter for lldb
+    * if this works in MI?
+    * print static member?
+
+- Show application exit reason in the Debug View
+
+- New config page options
+    * Inherit environment for inferior (related settings: inherit-env)
 
 - Clean up tool views
     * register views
@@ -26,11 +42,10 @@
 
 - [DONE] Find a way to avoid duplicate tool views for GDB and LLDB plugin
 
-- Remove duplicate breakpoint: look at breakpointController()->setDeleteDuplicateBreakpoints(true)
-
 - Polish debugger console
     * [DONE] user command output regarded as internal command
     * [DONE] not correctly raised when starting debug
+    * correct prompt (from "(gdb)" to "(lldb)")
 
 - Handle error sometime with Command 'exec-run'. Invalid process during debug session.
 
@@ -72,13 +87,9 @@
             - https://llvm.org/bugs/show_bug.cgi?id=28718
     * [SUBMITED] -stack-list-locals shows empty list
         - https://llvm.org/bugs/show_bug.cgi?id=28621
+    * -data-list-register-values output format doesn't conform to spec
     * File bug to lldb-mi for other missing commands
 
-- Data formatter for lldb
-    * if this works in MI?
-    * print static member?
-- Disasembly format string
-    * implement asm-demangle?
 - Fix TODOs in files
 
 - Change test_gdb to avoid direct use of QTest::qWait, which starts event loop, and could cause session to
@@ -100,19 +111,11 @@
             - Can still manually add watch point
     * Threads
         + lldb-mi crashes when break on a point where multiple threads running. (Fixed in latest lldb trunk version)
+    * Attach to process
+        + works internally, but there's no way to access it in the UI currently.
 
 relavent lldb settings:
 
 disassembly-format
 thread-format
 frame-format
-
-target
-    run-args
-    env-vars
-    inherit-env
-
-    x86-disassembly-flavor
-
-    use-hex-immediates
-    hex-immediate-style
