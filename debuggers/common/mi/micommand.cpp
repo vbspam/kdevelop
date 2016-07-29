@@ -155,9 +155,6 @@ QString MICommand::miCommand() const
         case BreakAfter:
             command = "break-after";//"ignore"
             break;
-        case BreakCatch: // FIXME: non-exist command
-            command = "break-catch";
-            break;
         case BreakCommands:
             command = "break-commands";
             break;
@@ -252,17 +249,8 @@ QString MICommand::miCommand() const
         case ExecNextInstruction:
             command = "exec-next-instruction";
             break;
-        case ExecReturn: // FIXME: non-exist command
-            command = "exec-command =";
-            break;
         case ExecRun:
             command = "exec-run";
-            break;
-        case ExecShowArguments: // FIXME: non-exist command
-            command = "exec-show-arguments";
-            break;
-        case ExecSignal: // FIXME: non-exist command
-            command = "exec-signal";
             break;
         case ExecStep:
             command = "exec-step";
@@ -274,17 +262,11 @@ QString MICommand::miCommand() const
             command = "exec-until";
             break;
 
-        case FileClear: // FIXME: non-exist command
-            command = "file-clear";
-            break;
         case FileExecAndSymbols:
             command = "file-exec-and-symbols";//"file"
             break;
         case FileExecFile:
             command = "file-exec-file";//"exec-file"
-            break;
-        case FileListExecSections: // FIXME: non-exist command
-            command = "file-list-exec-sections";
             break;
         case FileListExecSourceFile:
             command = "file-list-exec-source-file";
@@ -292,19 +274,10 @@ QString MICommand::miCommand() const
         case FileListExecSourceFiles:
             command = "file-list-exec-source-files";
             break;
-        case FileListSharedLibraries: // FIXME: non-exist command
-            command = "file-list-shared-libraries";
-            break;
-        case FileListSymbolFiles: // FIXME: non-exist command
-            command = "file-list-symbol-files";
-            break;
         case FileSymbolFile:
             command = "file-symbol-file";//"symbol-file"
             break;
 
-        case GdbComplete: // FIXME: non-exist command
-            command = "gdb-complete";
-            break;
         case GdbExit:
             command = "gdb-exit";
             break;
@@ -313,9 +286,6 @@ QString MICommand::miCommand() const
             break;
         case GdbShow:
             command = "gdb-show";//"show"
-            break;
-        case GdbSource: // FIXME: non-exist command
-            command = "gdb-source";
             break;
         case GdbVersion:
             command = "gdb-version";//"show version"
@@ -336,37 +306,9 @@ QString MICommand::miCommand() const
             command = "list-features";
             break;
 
-        case OverlayAuto: // FIXME: non-exist command
-            command = "overlay-auto";
-            break;
-        case OverlayListMappingState: // FIXME: non-exist command
-            command = "overlay-list-mapping-state";
-            break;
-        case OverlayListOverlays: // FIXME: non-exist command
-            command = "overlay-list-overlays";
-            break;
-        case OverlayMap: // FIXME: non-exist command
-            command = "overlay-map";
-            break;
-        case OverlayOff: // FIXME: non-exist command
-            command = "overlay-off";
-            break;
-        case OverlayOn: // FIXME: non-exist command
-            command = "overlay-on";
-            break;
-        case OverlayUnmap: // FIXME: non-exist command
-            command = "overlay-unmap";
-            break;
-
         case SignalHandle:
             return "handle";
             //command = "signal-handle";
-            break;
-        case SignalListHandleActions: // FIXME: non-exist command
-            command = "signal-list-handle-actions";
-            break;
-        case SignalListSignalTypes: // FIXME: non-exist command
-            command = "signal-list-signal-types";
             break;
 
         case StackInfoDepth:
@@ -378,9 +320,6 @@ QString MICommand::miCommand() const
         case StackListArguments:
             command = "stack-list-arguments";
             break;
-        case StackListExceptionHandlers: // FIXME: non-exist command
-            command = "stack-list-exception-handlers";
-            break;
         case StackListFrames:
             command = "stack-list-frames";
             break;
@@ -391,45 +330,12 @@ QString MICommand::miCommand() const
             command = "stack-select-frame";
             break;
 
-        case SymbolInfoAddress: // FIXME: non-exist command
-            command = "symbol-info-address";
-            break;
-        case SymbolInfoFile: // FIXME: non-exist command
-            command = "symbol-info-file";
-            break;
-        case SymbolInfoFunction: // FIXME: non-exist command
-            command = "symbol-info-function";
-            break;
-        case SymbolInfoLine: // FIXME: non-exist command
-            command = "symbol-info-line";
-            break;
-        case SymbolInfoSymbol: // FIXME: non-exist command
-            command = "symbol-info-symbol";
-            break;
-        case SymbolListFunctions: // FIXME: non-exist command
-            command = "symbol-list-functions";
-            break;
         case SymbolListLines:
             command = "symbol-list-lines";
-            break;
-        case SymbolListTypes: // FIXME: non-exist command
-            command = "symbol-list-types";
-            break;
-        case SymbolListVariables: // FIXME: non-exist command
-            command = "symbol-list-variables";
-            break;
-        case SymbolLocate: // FIXME: non-exist command
-            command = "symbol-locate";
-            break;
-        case SymbolType: // FIXME: non-exist command
-            command = "symbol-type";
             break;
 
         case TargetAttach:
             command = "target-attach";
-            break;
-        case TargetCompareSections: // FIXME: non-exist command
-            command = "target-compare-sections";
             break;
         case TargetDetach:
             command = "target-detach";//"detach"
@@ -440,27 +346,12 @@ QString MICommand::miCommand() const
         case TargetDownload:
             command = "target-download";
             break;
-        case TargetExecStatus: // FIXME: non-exist command
-            command = "target-exec-status";
-            break;
-        case TargetListAvailableTargets: // FIXME: non-exist command
-            command = "target-list-available-targets";
-            break;
-        case TargetListCurrentTargets: // FIXME: non-exist command
-            command = "target-list-current-targets";
-            break;
-        case TargetListParameters: // FIXME: non-exist command
-            command = "target-list-parameters";
-            break;
         case TargetSelect:
             command = "target-select";
             break;
 
         case ThreadInfo:
             command = "thread-info";
-            break;
-        case ThreadListAllThreads: // FIXME: non-exist command
-            command = "thread-list-all-threads";
             break;
         case ThreadListIds:
             command = "thread-list-ids";
@@ -469,44 +360,8 @@ QString MICommand::miCommand() const
             command = "thread-select";
             break;
 
-        case TraceActions: // FIXME: non-exist command
-            command = "trace-actions";
-            break;
-        case TraceDelete: // FIXME: non-exist command
-            command = "trace-delete";
-            break;
-        case TraceDisable: // FIXME: non-exist command
-            command = "trace-disable";
-            break;
-        case TraceDump: // FIXME: non-exist command
-            command = "trace-dump";
-            break;
-        case TraceEnable: // FIXME: non-exist command
-            command = "trace-enable";
-            break;
-        case TraceExists: // FIXME: non-exist command
-            command = "trace-exists";
-            break;
         case TraceFind:
             command = "trace-find";
-            break;
-        case TraceFrameNumber: // FIXME: non-exist command
-            command = "trace-frame-number";
-            break;
-        case TraceInfo: // FIXME: non-exist command
-            command = "trace-info";
-            break;
-        case TraceInsert: // FIXME: non-exist command
-            command = "trace-insert";
-            break;
-        case TraceList: // FIXME: non-exist command
-            command = "trace-list";
-            break;
-        case TracePassCount: // FIXME: non-exist command
-            command = "trace-pass-count";
-            break;
-        case TraceSave: // FIXME: crashes gdb
-            command = "trace-save";
             break;
         case TraceStart:
             command = "trace-start";
@@ -529,9 +384,6 @@ QString MICommand::miCommand() const
             break;
         case VarInfoPathExpression:
             command = "var-info-path-expression";
-            break;
-        case VarInfoExpression: // FIXME: non-exist command
-            command = "var-info-expression";
             break;
         case VarInfoNumChildren:
             command = "var-info-num-children";
