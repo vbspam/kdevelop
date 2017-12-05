@@ -179,7 +179,7 @@ ReferencedTopDUContext ClangHelpers::buildDUChain(CXFile file, const Imports& im
         }
         context->updateImportsCache();
     }
-
+    //std::cout << "buildDUChain: file=" <<ClangString(clang_getFileName(file)).toString().toStdString() <<std::endl;
     const auto problems = session.problemsForFile(file);
     {
         DUChainWriteLocker lock;

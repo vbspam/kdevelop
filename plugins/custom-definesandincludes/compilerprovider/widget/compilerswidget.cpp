@@ -174,7 +174,12 @@ void CompilersWidget::compilerEdited()
     auto indexes = m_ui->compilers->selectionModel()->selectedIndexes();
     Q_ASSERT(!indexes.isEmpty());
 
-    auto compiler = indexes.first().data(CompilersModel::CompilerDataRole);
+    if (indexes.isEmpty())
+        return;
+    if (indexes.size()<=0)
+        return;
+    auto compilerItem = indexes.first();
+    auto compiler = compilerItem.data(CompilersModel::CompilerDataRole);
     if (!compiler.value<CompilerPointer>()) {
         return;
     }

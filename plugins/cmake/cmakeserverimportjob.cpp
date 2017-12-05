@@ -136,7 +136,7 @@ void CMakeServerImportJob::processCodeModel(const QJsonObject &response, CMakePr
                         // NOTE: we use the canonical file path to prevent issues with symlinks in the path
                         //       leading to lookup failures
                         const auto localFile = rt->pathInHost(source);
-                        const auto canonicalFile = QFileInfo(source.toLocalFile()).canonicalFilePath();
+                        const auto canonicalFile = QFileInfo(source.toLocalFile()).absoluteFilePath();
                         const auto sourcePath = localFile.toLocalFile() == canonicalFile ? localFile : KDevelop::Path(canonicalFile);
                         data.compilationData.files[sourcePath] = file;
                     }

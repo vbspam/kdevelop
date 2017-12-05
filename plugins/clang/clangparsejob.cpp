@@ -119,10 +119,11 @@ Path userDefinedPchIncludeForFile(const QString& sourcefile)
 ProjectFileItem* findProjectFileItem(const IndexedString& url, bool* hasBuildSystemInfo)
 {
     ProjectFileItem* file = nullptr;
-
+    IndexedString modurl;
+    modurl = IndexedString(QUrl(QFileInfo( QFile( url.str())).absoluteFilePath() ).toString() );
     *hasBuildSystemInfo = false;
     for (auto project: ICore::self()->projectController()->projects()) {
-        auto files = project->filesForPath(url);
+        auto files = project->filesForPath(modurl);
         if (files.isEmpty()) {
             continue;
         }
@@ -177,6 +178,7 @@ ClangParseJob::ClangParseJob(const IndexedString& url, ILanguageSupport* languag
         m_environment.addDefines(IDefinesAndIncludesManager::manager()->defines(tuUrl.str()));
         m_environment.setParserSettings(ClangSettingsManager::self()->parserSettings(tuUrl.str()));
     }
+    std::cout << "ClangParseJob file: "<<url.str().toStdString()<<" hasBuildSystemInfo="<<hasBuildSystemInfo<<std::endl;
     const bool isSource = ClangHelpers::isSource(tuUrl.str());
     m_environment.setQuality(
         isSource ? (hasBuildSystemInfo ? ClangParsingEnvironment::BuildSystem : ClangParsingEnvironment::Source)
