@@ -112,6 +112,17 @@ CMakeManager::~CMakeManager()
 
 bool CMakeManager::hasBuildInfo(ProjectBaseItem* item) const
 {
+    std::cout << "HBSI: " << item->path().toUrl().toString().toStdString() << "\n";
+    bool has = m_projects[item->project()].compilationData.files.contains(item->path());
+    if (!has)
+    {
+        auto keys = m_projects[item->project()].compilationData.files.keys();
+        for (auto i: keys)
+        {
+            std::cout << i.path().toStdString() <<"\n";
+        }
+        
+    }
     return m_projects[item->project()].compilationData.files.contains(item->path());
 }
 
