@@ -119,11 +119,9 @@ Path userDefinedPchIncludeForFile(const QString& sourcefile)
 ProjectFileItem* findProjectFileItem(const IndexedString& url, bool* hasBuildSystemInfo)
 {
     ProjectFileItem* file = nullptr;
-    IndexedString modurl;
-    modurl = IndexedString(QUrl(QFileInfo( QFile( url.str())).absoluteFilePath() ).toString() );
     *hasBuildSystemInfo = false;
     for (auto project: ICore::self()->projectController()->projects()) {
-        auto files = project->filesForPath(modurl);
+        auto files = project->filesForPath(url);
         if (files.isEmpty()) {
             continue;
         }
